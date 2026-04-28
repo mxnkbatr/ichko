@@ -1,0 +1,265 @@
+import React, { createContext, useContext, useMemo, useState } from 'react'
+
+export type Lang = 'mn' | 'en'
+
+const STORAGE_KEY = 'hool.lang'
+
+type Dict = Record<string, string>
+
+const MN: Dict = {
+  common_close: 'Хаах',
+  common_cancel: 'Цуцлах',
+  common_save: 'Хадгалах',
+  common_new: 'Шинэ',
+  common_yes: 'Тийм',
+  common_no: 'Үгүй',
+  common_note: 'Тэмдэглэл',
+  nav_explore: 'Судлах',
+  nav_filters: 'Шүүлтүүр',
+  nav_favorites: 'Дуртай',
+  nav_bookings: 'Захиалга',
+  nav_me: 'Миний',
+  common_clear_all: 'Бүгдийг цэвэрлэх',
+  common_reset: 'Сэргээх',
+  common_clear_filter: 'Шүүлтүүр цэвэрлэх',
+  common_apply: 'Хэрэгжүүлэх',
+  common_back: 'Буцах',
+  common_exit: 'Гарах',
+  explore_location_not_available_title: 'Байршил боломжгүй',
+  explore_location_not_available_hint: 'Browser-ын тохиргоо/permission-оо шалгаарай.',
+  explore_title: 'Ойролцоо санал болгосон',
+  explore_subtitle: 'Газрын зураг дээрээс олж, меню үзээд, цаг захиална.',
+  explore_my_location: 'Миний байршил',
+  explore_locating: 'Байршил авч байна…',
+  explore_location_on: 'Байршил асаалттай',
+  explore_search_placeholder: 'Нэр / хаяг / vibe…',
+  explore_no_active_filters: 'Идэвхтэй шүүлтүүр алга',
+  explore_advanced_filters: 'Нэмэлт шүүлтүүр',
+  explore_tip: 'Tip: Map pin дээр дарвал дэлгэрэнгүй рүү орно. Дараа нь “Цаг захиалах” дээр дарж цаг захиална.',
+  explore_quick_open_first: 'Эхний илэрцийг нээх',
+  category_all: 'Бүгд',
+  category_restaurant: 'Ресторан',
+  category_pub: 'Паб / Бар',
+  category_cafe: 'Кафе',
+  filter_title: 'Шүүлтүүр',
+  filter_header_hint: 'Хамгийн их ашиглагддаг · native feel',
+  filter_wizard_title: 'Танд тохирохыг олъё',
+  filter_step_location: 'Байршил',
+  filter_step_district: 'Дүүрэг',
+  filter_step_vibe: 'Mood / vibe',
+  filter_step_results: 'Үр дүн',
+  filter_city_ub: 'Улаанбаатар',
+  filter_district_sbd: 'СБД',
+  filter_district_bgd: 'БГД',
+  filter_district_shd: 'СХД',
+  vibe_chill: 'Chill',
+  vibe_party: 'Party',
+  vibe_romantic: 'Romantic',
+  vibe_family: 'Family',
+  vibe_work: 'Work-friendly',
+  vibe_music: 'Live music',
+  vibe_craft: 'Craft',
+  filter_search: 'Хайлт',
+  filter_category: 'Ангилал',
+  filter_preview: 'Урьдчилж харах',
+  filter_places: 'газар',
+  filter_apply_count: 'Хэрэгжүүлэх',
+  place_open: 'Нээлттэй',
+  place_closed: 'Хаалттай',
+  place_away_km: 'км',
+  place_details_book_time: 'Цаг захиалах',
+  place_not_found: 'Газар олдсонгүй',
+  place_back_home: 'Буцах',
+  place_address: 'Хаяг',
+  place_hours: 'Цагийн хуваарь',
+  place_phone: 'Утас',
+  place_closes_at: 'Хаах цаг',
+  place_highlights: 'Онцлох',
+  place_menu_picks: 'Меню (сонголт)',
+  place_book_table: 'Ширээ захиалах',
+  booking_title: 'Ширээ захиалах',
+  booking_confirm: 'Захиалга батлах',
+  booking_time_slot: 'Цагийн сонголт',
+  booking_people: 'Хүн',
+  booking_name: 'Нэр',
+  booking_phone: 'Утас',
+  booking_note: 'Тэмдэглэл (заавал биш)',
+  booking_note_ph: 'Ж: цонхны хажуу, төрсөн өдөр, харшил…',
+  booking_created: 'Захиалга үүслээ!',
+  booking_error_conflict: 'Энэ цаг аль хэдийн захиалагдсан байна. Өөр цаг сонгоно уу.',
+  bookings_title: 'Захиалгууд',
+  bookings_subtitle: 'Таны захиалгууд. Цуцлах / шилжүүлэх боломжтой.',
+  bookings_new: 'Шинэ',
+  bookings_none: 'Одоогоор захиалга алга',
+  bookings_none_hint: 'Дэлгэрэнгүй дээр “Цаг захиалах” дарж эхлээрэй.',
+  bookings_reschedule: 'Шилжүүлэх',
+  bookings_cancel: 'Цуцлах',
+  bookings_cancelled: 'Цуцлагдсан',
+  bookings_reschedule_title: 'Шилжүүлэх',
+  bookings_reschedule_hint: 'Шинэ өдөр/цаг сонгоод хадгална.',
+  bookings_save_changes: 'Өөрчлөлтийг хадгалах',
+  favorites_title: 'Дуртай',
+  favorites_subtitle: 'Танд таалагдсан газрууд (prototype).',
+  favorites_saved: 'Хадгалсан',
+  favorites_empty_title: 'Одоогоор дуртай газар алга',
+  favorites_empty_hint: 'Дараагийн шатанд дэлгэрэнгүй дээр “Хадгалах” товч нэмээд энд синк хийнэ.',
+  favorites_explore_nearby: 'Ойр хавиар судлах',
+  profile_title: 'Миний',
+  about_title: 'Тухай',
+  theme_dark: 'Харанхуй',
+  theme_light: 'Гэрэл',
+  lang_mn: 'MN',
+  lang_en: 'EN',
+}
+
+const EN: Dict = {
+  common_close: 'Close',
+  common_cancel: 'Cancel',
+  common_save: 'Save',
+  common_new: 'New',
+  common_yes: 'Yes',
+  common_no: 'No',
+  common_note: 'Note',
+  nav_explore: 'Explore',
+  nav_filters: 'Filters',
+  nav_favorites: 'Favorites',
+  nav_bookings: 'Bookings',
+  nav_me: 'Me',
+  common_clear_all: 'Clear all',
+  common_reset: 'Reset',
+  common_clear_filter: 'Clear filter',
+  common_apply: 'Apply',
+  common_back: 'Back',
+  common_exit: 'Exit',
+  explore_location_not_available_title: 'Location not available',
+  explore_location_not_available_hint: 'Check browser settings/permission.',
+  explore_title: 'Nearby picks',
+  explore_subtitle: 'Find on map, view menu, and book a time.',
+  explore_my_location: 'My location',
+  explore_locating: 'Locating…',
+  explore_location_on: 'Location on',
+  explore_search_placeholder: 'name / address / vibe…',
+  explore_no_active_filters: 'No active filters',
+  explore_advanced_filters: 'Advanced filters',
+  explore_tip: 'Tip: Tap a map pin to open details, then book a time.',
+  explore_quick_open_first: 'Open first result',
+  category_all: 'All',
+  category_restaurant: 'Restaurant',
+  category_pub: 'Pub / Bar',
+  category_cafe: 'Cafe',
+  filter_title: 'Filters',
+  filter_header_hint: 'Most‑used · native feel',
+  filter_wizard_title: 'Find your match',
+  filter_step_location: 'Location',
+  filter_step_district: 'District',
+  filter_step_vibe: 'Mood / vibe',
+  filter_step_results: 'Results',
+  filter_city_ub: 'Ulaanbaatar',
+  filter_district_sbd: 'SBD',
+  filter_district_bgd: 'BGD',
+  filter_district_shd: 'SHD',
+  vibe_chill: 'Chill',
+  vibe_party: 'Party',
+  vibe_romantic: 'Romantic',
+  vibe_family: 'Family',
+  vibe_work: 'Work-friendly',
+  vibe_music: 'Live music',
+  vibe_craft: 'Craft',
+  filter_search: 'Search',
+  filter_category: 'Category',
+  filter_preview: 'Preview',
+  filter_places: 'places',
+  filter_apply_count: 'Apply',
+  place_open: 'Open',
+  place_closed: 'Closed',
+  place_away_km: 'km',
+  place_details_book_time: 'Book time',
+  place_not_found: 'Place not found',
+  place_back_home: 'Back',
+  place_address: 'Address',
+  place_hours: 'Hours',
+  place_phone: 'Phone',
+  place_closes_at: 'Closes',
+  place_highlights: 'Highlights',
+  place_menu_picks: 'Menu picks',
+  place_book_table: 'Book a table',
+  booking_title: 'Book a table',
+  booking_confirm: 'Confirm booking',
+  booking_time_slot: 'Time slot',
+  booking_people: 'People',
+  booking_name: 'Name',
+  booking_phone: 'Phone',
+  booking_note: 'Note (optional)',
+  booking_note_ph: 'e.g. window seat, birthday, allergy…',
+  booking_created: 'Booking created!',
+  booking_error_conflict: 'That time is already booked. Please pick another slot.',
+  bookings_title: 'Bookings',
+  bookings_subtitle: 'Your bookings. Cancel / reschedule available.',
+  bookings_new: 'New',
+  bookings_none: 'No bookings yet',
+  bookings_none_hint: 'Open a place and tap “Book time”.',
+  bookings_reschedule: 'Reschedule',
+  bookings_cancel: 'Cancel',
+  bookings_cancelled: 'Cancelled',
+  bookings_reschedule_title: 'Reschedule',
+  bookings_reschedule_hint: 'Pick a new date/time and save.',
+  bookings_save_changes: 'Save changes',
+  favorites_title: 'Favorites',
+  favorites_subtitle: 'Saved places (prototype).',
+  favorites_saved: 'Saved',
+  favorites_empty_title: 'No favorites yet',
+  favorites_empty_hint: 'Next: add “Save” on place details and sync here.',
+  favorites_explore_nearby: 'Explore nearby',
+  profile_title: 'Me',
+  about_title: 'About',
+  theme_dark: 'Dark',
+  theme_light: 'Light',
+  lang_mn: 'MN',
+  lang_en: 'EN',
+}
+
+function getStoredLang(): Lang | null {
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (raw === 'mn' || raw === 'en') return raw
+  return null
+}
+
+const I18nCtx = createContext<{
+  lang: Lang
+  setLang: (l: Lang) => void
+  t: (key: keyof typeof MN) => string
+} | null>(null)
+
+export function I18nProvider({
+  children,
+  defaultLang = 'mn',
+}: {
+  children: React.ReactNode
+  defaultLang?: Lang
+}) {
+  const [lang, setLangState] = useState<Lang>(() => getStoredLang() ?? defaultLang)
+
+  const setLang = (l: Lang) => {
+    setLangState(l)
+    localStorage.setItem(STORAGE_KEY, l)
+  }
+
+  const dict = lang === 'mn' ? MN : EN
+  const value = useMemo(
+    () => ({
+      lang,
+      setLang,
+      t: (key: keyof typeof MN) => dict[key] ?? String(key),
+    }),
+    [lang, dict],
+  )
+
+  return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>
+}
+
+export function useI18n() {
+  const ctx = useContext(I18nCtx)
+  if (!ctx) throw new Error('useI18n must be used within I18nProvider')
+  return ctx
+}
+
