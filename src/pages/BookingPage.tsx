@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, CheckCircle2, Clock, Users } from 'lucide-react'
+import { 
+  ArrowLeft, Calendar, Check, Clock, Users, 
+  ChevronRight, Phone, User, MessageSquare, ShieldCheck,
+  CheckCircle2, Home, List
+} from 'lucide-react'
 import { getPlaceById } from '../data/places'
 import { createBooking, hasConflict } from '../lib/bookings'
 import { generateSlots, todayIso } from '../lib/time'
 import { cn } from '../lib/cn'
 import { useI18n } from '../lib/i18n'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const DEFAULT_OPEN = '11:00'
 
@@ -18,16 +23,13 @@ export function BookingPage() {
 
   const [date, setDate] = useState(() => sp.get('date') ?? todayIso())
   const [time, setTime] = useState(() => sp.get('time') ?? '19:00')
-  const [people, setPeople] = useState(2)
+  const [people, setPeople] = useState(() => Number(sp.get('size') ?? 2))
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
+  
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const summary = useMemo(() => {
-    return `${date} • ${time} • ${people} хүн`
-  }, [date, time, people])
 
   const slots = useMemo(() => {
     const close = place?.closesAt || '23:00'
@@ -35,224 +37,286 @@ export function BookingPage() {
     return generateSlots({ start, end: close, stepMin: 30 })
   }, [place?.closesAt])
 
-  if (!place) {
+  if (!place) return (
+    <div className="flex flex-col items-center justify-center py-20">
+      <h1 className="text-2xl font-bold">Газар олдсонгүй</h1>
+      <Link to="/" className="mt-4 text-orange-500 font-bold">Буцах</Link>
+    </div>
+  )
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    if (hasConflict(place.id, date, time)) {
+      setError('Уучлаарай, энэ цагт захиалга дүүрсэн байна.')
+      return
+    }
+    createBooking({
+      placeId: place.id,
+      placeName: place.name,
+      date,
+      time,
+      people,
+      name,
+      phone,
+      note: note.trim() ? note : undefined,
+    })
+    setSubmitted(true)
+  }
+
+  if (submitted) {
     return (
-      <div className="rounded-3xl border border-zinc-200 bg-white/70 p-6 text-[14px] text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
-        {t('place_not_found')}.{' '}
-        <Link to="/" className="underline">
-          {t('common_back')}
-        </Link>
+      <div className="mx-auto flex max-w-lg flex-col items-center justify-center py-12 text-center md:py-24">
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+          className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500 shadow-xl shadow-emerald-500/20"
+        >
+          <Check className="h-12 w-12 text-white stroke-[4]" />
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8"
+        >
+          <h1 className="text-[28px] font-black tracking-tight text-zinc-950 dark:text-white">
+            Захиалга амжилттай!
+          </h1>
+          <p className="mt-2 text-[15px] font-medium text-zinc-500 dark:text-zinc-400">
+            Таны захиалгыг баталгаажууллаа.
+          </p>
+
+          <div className="mt-8 rounded-3xl border border-zinc-100 bg-zinc-50 p-6 text-left dark:border-white/5 dark:bg-white/5">
+            <div className="text-[17px] font-bold text-zinc-900 dark:text-white">{place.name}</div>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-zinc-500">
+              <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {date}</span>
+              <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {time}</span>
+              <span className="flex items-center gap-1.5"><Users className="h-4 w-4" /> {people} хүн</span>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3">
+            <Link
+              to="/bookings"
+              className="flex items-center justify-center gap-2 rounded-full bg-zinc-900 py-4 text-[15px] font-bold text-white shadow-xl transition hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100"
+            >
+              <List className="h-4.5 w-4.5" />
+              Захиалгуудаа харах
+            </Link>
+            <Link
+              to="/"
+              className="flex items-center justify-center gap-2 rounded-full border border-zinc-200 py-4 text-[15px] font-bold text-zinc-600 transition hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5"
+            >
+              <Home className="h-4.5 w-4.5" />
+              Нүүр хуудас руу
+            </Link>
+          </div>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          to={`/place/${place.id}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-zinc-100 px-3 py-2 text-[13px] font-semibold text-zinc-800 transition hover:bg-zinc-200 dark:bg-white/10 dark:text-zinc-100 dark:hover:bg-white/15"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('common_back')}
-        </Link>
-        <button
-          type="button"
-          onClick={() => nav('/')}
-          className="rounded-2xl px-3 py-2 text-[13px] font-semibold text-zinc-600 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10"
-        >
-          {t('common_exit')}
-        </button>
-      </div>
+    <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+      {/* Back link */}
+      <Link 
+        to={`/place/${place.id}`}
+        className="mb-8 flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {place.name} руу буцах
+      </Link>
 
-      <div className="rounded-3xl border border-zinc-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="text-[22px] font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-              {t('booking_title')}
-            </div>
-            <div className="mt-1 text-[13px] text-zinc-500 dark:text-zinc-400">
-              {place.name} · {place.address}
-            </div>
-          </div>
-          <div className="rounded-2xl bg-brand-500/10 px-3 py-2 text-[13px] font-semibold text-brand-700 dark:text-brand-200">
-            {summary}
-          </div>
-        </div>
+      <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
+        {/* FORM COLUMN */}
+        <div className="space-y-10">
+          <section>
+            <h1 className="text-[32px] font-black tracking-tight text-zinc-950 dark:text-white">Захиалгын мэдээлэл</h1>
+            <p className="mt-2 text-zinc-500">Доорх мэдээллийг бөглөж захиалгаа баталгаажуулна уу.</p>
+          </section>
 
-        {error && (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50/80 px-3 py-2 text-[13px] font-semibold text-rose-900 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-100">
-            {error}
-          </div>
-        )}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {error && (
+              <div className="flex items-center gap-2 rounded-2xl bg-rose-50 p-4 text-[14px] font-bold text-rose-600 dark:bg-rose-500/10">
+                <ShieldCheck className="h-5 w-5" />
+                {error}
+              </div>
+            )}
 
-        <form
-          className="mt-6 grid gap-4 sm:grid-cols-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            setError(null)
-            if (hasConflict(place.id, date, time)) {
-              setError(t('booking_error_conflict'))
-              return
-            }
-            createBooking({
-              placeId: place.id,
-              placeName: place.name,
-              date,
-              time,
-              people,
-              name,
-              phone,
-              note: note.trim() ? note : undefined,
-            })
-            setSubmitted(true)
-            setTimeout(() => nav('/bookings'), 600)
-          }}
-        >
-          <label className="block">
-            <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              <Calendar className="h-4 w-4 text-zinc-400" />
-              Өдөр
+            {/* Date & Time */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">📅 Огноо</label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 pl-12 text-[14px] font-bold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
             </div>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-2xl border border-zinc-200 bg-white/70 px-3 py-2.5 text-[14px] outline-none ring-brand-500/40 focus:ring-2 dark:border-white/10 dark:bg-white/5"
-              required
-            />
-          </label>
 
-          <div className="block">
-            <div className="mb-2 flex items-center justify-between gap-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              <span className="inline-flex items-center gap-2">
-                <Clock className="h-4 w-4 text-zinc-400" />
-                {t('booking_time_slot')}
-              </span>
-              <span className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
-                {DEFAULT_OPEN}–{place.closesAt}
-              </span>
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">🕐 Цаг сонгох</label>
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-4">
+                {slots.map(s => {
+                  const busy = hasConflict(place.id, date, s)
+                  const active = time === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setTime(s)}
+                      className={cn(
+                        "rounded-2xl border py-2.5 text-[13px] font-bold transition-all",
+                        busy 
+                          ? "opacity-30 cursor-not-allowed line-through border-zinc-100 dark:border-white/5" 
+                          : active
+                            ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/25 scale-105"
+                            : "border-zinc-200 bg-white hover:border-zinc-300 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-300"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {slots.map((s) => {
-                const busy = hasConflict(place.id, date, s)
-                const active = time === s
-                return (
+
+            {/* Party Size */}
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">👥 Хэдэн хүн?</label>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {[1, 2, 3, 4, 5, 6, 8, 10].map(s => (
                   <button
                     key={s}
                     type="button"
-                    disabled={busy}
-                    onClick={() => setTime(s)}
+                    onClick={() => setPeople(s)}
                     className={cn(
-                      'rounded-2xl border px-3 py-2 text-[13px] font-semibold transition',
-                      busy
-                        ? 'cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-white/10 dark:bg-white/5 dark:text-white/30'
-                        : active
-                          ? 'border-brand-500/40 bg-brand-500 text-white shadow-glass'
-                          : 'border-zinc-200 bg-white/70 text-zinc-800 hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:hover:bg-white/10',
+                      "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-[15px] font-bold transition-all",
+                      people === s
+                        ? "bg-zinc-900 text-white dark:bg-white dark:text-black border-zinc-900 dark:border-white"
+                        : "border-zinc-200 bg-white hover:border-zinc-300 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-400"
                     )}
                   >
-                    {s}
+                    {s}{s === 10 ? '+' : ''}
                   </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <label className="block">
-            <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              <Users className="h-4 w-4 text-zinc-400" />
-              {t('booking_people')}
-            </div>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={people}
-              onChange={(e) => setPeople(Number(e.target.value))}
-              className="w-full rounded-2xl border border-zinc-200 bg-white/70 px-3 py-2.5 text-[14px] outline-none ring-brand-500/40 focus:ring-2 dark:border-white/10 dark:bg-white/5"
-              required
-            />
-          </label>
-
-          <label className="block">
-            <div className="mb-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              {t('booking_name')}
-            </div>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('booking_name')}
-              className="w-full rounded-2xl border border-zinc-200 bg-white/70 px-3 py-2.5 text-[14px] outline-none ring-brand-500/40 focus:ring-2 dark:border-white/10 dark:bg-white/5"
-              required
-            />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <div className="mb-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              {t('booking_phone')}
-            </div>
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+976 .... ...."
-              className="w-full rounded-2xl border border-zinc-200 bg-white/70 px-3 py-2.5 text-[14px] outline-none ring-brand-500/40 focus:ring-2 dark:border-white/10 dark:bg-white/5"
-              required
-            />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <div className="mb-2 text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
-              {t('booking_note')}
-            </div>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t('booking_note_ph')}
-              rows={4}
-              className="w-full resize-none rounded-2xl border border-zinc-200 bg-white/70 px-3 py-2.5 text-[14px] outline-none ring-brand-500/40 focus:ring-2 dark:border-white/10 dark:bg-white/5"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="sm:col-span-2 rounded-2xl bg-brand-500 px-4 py-3 text-[14px] font-semibold text-white shadow-glass transition hover:opacity-95"
-          >
-            {t('booking_confirm')}
-          </button>
-        </form>
-      </div>
-
-      {submitted && (
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50/80 p-5 shadow-sm backdrop-blur dark:border-emerald-500/20 dark:bg-emerald-500/10">
-          <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-300" />
-            <div className="min-w-0">
-              <div className="text-[14px] font-semibold text-emerald-900 dark:text-emerald-100">
-                {t('booking_created')}
-              </div>
-              <div className="mt-1 text-[13px] text-emerald-700 dark:text-emerald-200">
-                {place.name} · {summary} · {name}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Link
-                  to="/"
-                  className="rounded-2xl bg-emerald-600 px-3 py-2 text-[13px] font-semibold text-white transition hover:opacity-95"
-                >
-                  {t('nav_explore')}
-                </Link>
-                <Link
-                  to="/bookings"
-                  className="rounded-2xl bg-white px-3 py-2 text-[13px] font-semibold text-emerald-900 ring-1 ring-emerald-200 transition hover:bg-emerald-50 dark:bg-black/30 dark:text-emerald-50 dark:ring-emerald-500/30 dark:hover:bg-black/40"
-                >
-                  {t('nav_bookings')}
-                </Link>
+                ))}
               </div>
             </div>
-          </div>
+
+            {/* User Info */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">👤 Таны нэр</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Нэрээ оруулна уу"
+                    className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 pl-12 text-[14px] font-bold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">📞 Утасны дугаар</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="+976 ...."
+                    className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 pl-12 text-[14px] font-bold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">📝 Нэмэлт тэмдэглэл</label>
+              <div className="relative">
+                <MessageSquare className="absolute left-4 top-4 h-4 w-4 text-zinc-400" />
+                <textarea
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="Жишээ нь: Цонхны дэргэд суумаар байна..."
+                  rows={3}
+                  className="w-full resize-none rounded-2xl border border-zinc-200 bg-white px-4 py-3 pl-12 text-[14px] font-bold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                />
+              </div>
+            </div>
+            
+            {/* Hidden submit to handle Enter key */}
+            <button type="submit" className="hidden" />
+          </form>
         </div>
-      )}
+
+        {/* SUMMARY COLUMN */}
+        <aside className="relative">
+          <div className="sticky top-[200px] space-y-6">
+            <div className="rounded-[2.5rem] border border-zinc-100 bg-zinc-50/50 p-8 dark:border-white/5 dark:bg-white/5">
+              <h3 className="text-[13px] font-black uppercase tracking-widest text-zinc-400">Хураангуй</h3>
+              
+              <div className="mt-6 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-zinc-200">
+                    <img src={place.photos[0]?.url} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-[18px] font-black text-zinc-900 dark:text-white">{place.name}</div>
+                    <div className="text-[13px] font-medium text-zinc-500">{place.district} · {place.category === 'restaurant' ? 'Ресторан' : 'Паб'}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-y border-zinc-100 py-6 dark:border-white/5">
+                  <div className="text-center">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Огноо</div>
+                    <div className="mt-1 text-[13px] font-bold text-zinc-900 dark:text-white">{date}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Цаг</div>
+                    <div className="mt-1 text-[13px] font-bold text-zinc-900 dark:text-white">{time}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Хүн</div>
+                    <div className="mt-1 text-[13px] font-bold text-zinc-900 dark:text-white">{people}</div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Захиалах дүрэм:</h4>
+                  <ul className="space-y-2 text-[13px] font-medium text-zinc-500">
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 rounded-full bg-orange-500" /> Захиалгыг 30 мин өмнө цуцлах</li>
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 rounded-full bg-orange-500" /> Хоол заавал захиалах</li>
+                    <li className="flex items-center gap-2"><div className="h-1 w-1 rounded-full bg-orange-500" /> 15 минут хоцроход цуцлагдана</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="group relative w-full overflow-hidden rounded-full bg-orange-500 py-5 text-[15px] font-black text-white shadow-xl shadow-orange-500/30 transition hover:bg-orange-600 active:scale-95"
+            >
+              <div className="relative z-10 flex items-center justify-center gap-2">
+                Захиалга баталгаажуулах 
+                <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </button>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }
-

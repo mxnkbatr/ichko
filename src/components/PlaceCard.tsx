@@ -1,102 +1,124 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, MapPin, Navigation, Star } from 'lucide-react'
+import { MapPin, Heart, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { Place } from '../data/places'
 import { cn } from '../lib/cn'
-import { useI18n } from '../lib/i18n'
+import { isFavorite, toggleFavorite } from '../lib/favorites'
 
-function priceText(level: Place['priceLevel']) {
-  return '$'.repeat(level)
-}
-
-function categoryText(cat: Place['category']) {
-  if (cat === 'restaurant') return 'category_restaurant'
-  if (cat === 'pub') return 'category_pub'
-  return 'category_cafe'
+const CAT_LABEL: Record<Place['category'], string> = {
+  restaurant: 'Ресторан',
+  pub: 'Паб / Бар',
+  cafe: 'Кафе',
 }
 
 export function PlaceCard({
   place,
   selected,
+  index = 0,
 }: {
   place: Place
   selected?: boolean
+  index?: number
 }) {
-  const { t } = useI18n()
+  const [isFav, setIsFav] = useState(() => isFavorite(place.id))
+
+  const handleToggleFav = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleFavorite(place.id)
+    setIsFav(!isFav)
+  }
+
   return (
-    <Link
-      to={`/place/${place.id}`}
-      className={cn(
-        'group relative block overflow-hidden rounded-[2.5rem] border border-zinc-200/50 bg-white/60 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/10 dark:border-white/10 dark:bg-white/5',
-        selected && 'ring-2 ring-brand-500/60 shadow-lg shadow-orange-500/15',
-      )}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.03 }}
+      layout
     >
-      <div className="flex gap-5">
-        {/* Image Section */}
-        <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] bg-zinc-100 shadow-inner dark:bg-white/5">
+      <Link
+        to={`/place/${place.id}`}
+        className={cn(
+          "flex gap-4 rounded-3xl bg-white p-4 border-b border-zinc-100 transition-colors duration-150 cursor-pointer",
+          "dark:bg-zinc-900/40 dark:border-white/5",
+          "hover:bg-zinc-50 dark:hover:bg-white/3",
+          selected && "ring-2 ring-inset ring-orange-500 bg-orange-50/30 dark:bg-orange-500/10"
+        )}
+      >
+        {/* Index number */}
+        <div className="w-6 h-6 rounded-full bg-orange-500 text-white text-[11px] font-black flex items-center justify-center flex-none mt-1 shadow-sm">
+          {index + 1}
+        </div>
+
+        {/* Photo */}
+        <div className="w-[120px] h-[90px] rounded-2xl overflow-hidden flex-none bg-zinc-100 dark:bg-zinc-800">
           <img
             src={place.photos[0]?.url}
-            alt={place.photos[0]?.alt ?? place.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            loading="lazy"
+            alt={place.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-zinc-900 shadow-sm backdrop-blur-md dark:bg-black/80 dark:text-white">
-            <Star className="h-2.5 w-2.5 fill-orange-500 text-orange-500" />
-            {place.rating.toFixed(1)}
-          </div>
         </div>
 
-        {/* Content Section */}
-        <div className="min-w-0 flex-1">
+        {/* Content */}
+        <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
-            <div className="min-w-0">
-              <h3 className="truncate text-[18px] font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
-                {place.name}
-              </h3>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-bold text-orange-700 dark:bg-orange-500/20 dark:text-orange-200">
-                  {t(categoryText(place.category) as any)}
-                </span>
-                <span className="text-[12px] font-medium text-zinc-400">
-                  {priceText(place.priceLevel)}
-                </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-400">
-                  <span className="h-1 w-1 rounded-full bg-zinc-300" />
-                  {place.reviewCount} үнэлгээ
-                </span>
-              </div>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-colors group-hover:bg-orange-500 group-hover:text-white dark:bg-white/5">
-              <ChevronRight className="h-5 w-5" />
-            </div>
+            <h3 className="font-bold text-[16px] text-zinc-950 dark:text-white leading-snug truncate">
+              {place.name}
+            </h3>
+            <motion.button
+              whileTap={{ scale: 1.4 }}
+              onClick={handleToggleFav}
+              className={cn(
+                "ml-2 flex-none transition-colors p-1",
+                isFav ? "text-rose-500" : "text-zinc-300 hover:text-rose-400"
+              )}
+            >
+              <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
+            </motion.button>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100/50 pt-3 dark:border-white/5">
-            <div className="flex min-w-0 items-center gap-2 text-[12px] text-zinc-500 dark:text-zinc-400">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-orange-400" />
-              <span className="truncate">{place.address}</span>
-            </div>
+          <div className="mt-1 flex items-center gap-2 text-[13px]">
+            <span className="text-orange-500 font-bold flex items-center gap-0.5">
+              <Star className="h-3.5 w-3.5 fill-current" /> {place.rating.toFixed(1)}
+            </span>
+            <span className="text-zinc-400">({place.reviewCount.toLocaleString()})</span>
+            <span className="text-zinc-300">·</span>
+            <span className="text-zinc-600 dark:text-zinc-300 font-medium">{CAT_LABEL[place.category]}</span>
+            <span className="text-zinc-300">·</span>
+            <span className="text-zinc-500 font-bold">{'$'.repeat(place.priceLevel)}</span>
+          </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900 dark:text-zinc-100">
-                <Navigation className="h-3.5 w-3.5 text-zinc-400" />
-                {place.distanceKm.toFixed(1)} км
-              </div>
-              <div className={cn(
-                'flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider',
-                place.openNow ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'
-              )}>
-                <span className={cn(
-                  'h-1.5 w-1.5 rounded-full',
-                  place.openNow ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-zinc-300'
-                )} />
-                {place.openNow ? 'Нээлттэй' : 'Хаалттай'}
-              </div>
-            </div>
+          <div className="mt-1.5 text-[12px] text-zinc-500 flex items-center gap-1.5">
+            <MapPin className="h-3 w-3 shrink-0 text-zinc-400" />
+            <span className="truncate">{place.address}</span>
+            <span className="text-zinc-300">·</span>
+            <span className="font-bold text-zinc-700 dark:text-zinc-300">{place.distanceKm.toFixed(1)}км</span>
+          </div>
+
+          <div className="mt-1.5 flex items-center gap-1.5 text-[12px]">
+            <span className={cn(
+              "font-semibold flex items-center gap-1",
+              place.openNow ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
+            )}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", place.openNow ? "bg-emerald-500" : "bg-rose-500")} />
+              {place.openNow ? 'Нээлттэй' : 'Хаалттай'}
+            </span>
+            {place.openNow && <span className="text-zinc-400">· {place.closesAt} хүртэл</span>}
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {place.highlights.slice(0, 3).map(h => (
+              <span
+                key={h}
+                className="rounded-full bg-zinc-100 dark:bg-white/8 px-2.5 py-0.5 text-[11px] text-zinc-600 dark:text-zinc-300 font-medium"
+              >
+                {h}
+              </span>
+            ))}
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   )
 }
-

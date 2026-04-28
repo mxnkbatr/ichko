@@ -1,192 +1,255 @@
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Moon,
-  Bookmark,
-  CalendarCheck,
-  MapPinned,
-  Search,
-  SlidersHorizontal,
-  Sun,
-  Sparkles,
-  User,
+  Moon, Bookmark, CalendarCheck, MapPinned,
+  SlidersHorizontal, Sun, User, Search, MapPin,
+  ChevronRight, Compass,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { applyTheme, getStoredTheme, type ThemeMode } from '../lib/theme'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../lib/i18n'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const DESKTOP_NAV = [
-  { to: '/', labelKey: 'nav_explore', icon: MapPinned },
-  { to: '/filters', labelKey: 'nav_filters', icon: SlidersHorizontal },
+const NAV_ITEMS = [
+  { to: '/',          labelKey: 'nav_explore',   icon: Compass },
+  { to: '/filters',   labelKey: 'nav_filters',   icon: SlidersHorizontal },
+  { to: '/bookings',  labelKey: 'nav_bookings',  icon: CalendarCheck },
   { to: '/favorites', labelKey: 'nav_favorites', icon: Bookmark },
-  { to: '/bookings', labelKey: 'nav_bookings', icon: CalendarCheck },
-  { to: '/me', labelKey: 'nav_me', icon: User },
+  { to: '/me',        labelKey: 'nav_me',        icon: User },
 ] as const
 
-const MOBILE_NAV = [
-  { to: '/', labelKey: 'nav_explore', icon: MapPinned },
-  { to: '/filters', labelKey: 'nav_filters', icon: SlidersHorizontal },
-  { to: '/bookings', labelKey: 'nav_bookings', icon: CalendarCheck },
-  { to: '/me', labelKey: 'nav_me', icon: User },
+const CATEGORIES = [
+  { id: 'all',        emoji: '🗺️', label: 'Бүгд' },
+  { id: 'restaurant', emoji: '🍽️', label: 'Ресторан' },
+  { id: 'cafe',       emoji: '☕', label: 'Кафе' },
+  { id: 'pub',        emoji: '🍺', label: 'Паб/Бар' },
 ] as const
-
-function BrandMark() {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="grid h-9 w-9 place-items-center rounded-2xl bg-brand-500 text-white shadow-glass">
-        <MapPinned className="h-5 w-5" />
-      </div>
-      <div className="leading-tight">
-        <div className="text-[13px] font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          HOOL (prototype)
-        </div>
-        <div className="text-[12px] text-zinc-500 dark:text-zinc-400">
-          near • menu • booking
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function AppLayout() {
   const nav = useNavigate()
   const loc = useLocation()
-  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme() ?? 'dark')
+  const [params, setParams] = useSearchParams()
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme() ?? 'light')
   const { lang, setLang, t } = useI18n()
+  
+  // Geolocation state simulation (usually this would be in a context)
+  const [hasLocation, setHasLocation] = useState(false)
+  const [searchQuery, setSearchQuery] = useState(params.get('q') ?? '')
 
-  const active = (to: string) => {
-    if (to === '/') return loc.pathname === '/'
-    return loc.pathname === to || loc.pathname.startsWith(`${to}/`)
-  }
+  useEffect(() => {
+    // Check if geolocation was already granted or simulate
+    if ('geolocation' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' }).then(res => {
+        if (res.state === 'granted') setHasLocation(true)
+      })
+    }
+  }, [])
+
+  const currentCat = params.get('cat') || 'all'
+
+  const active = (to: string) =>
+    to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(to)
 
   const themeLabel = useMemo(
     () => (theme === 'dark' ? t('theme_dark') : t('theme_light')),
     [theme, t],
   )
 
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const next = new URLSearchParams(params)
+    if (searchQuery.trim()) next.set('q', searchQuery.trim())
+    else next.delete('q')
+    setParams(next, { replace: true })
+    if (loc.pathname !== '/' && loc.pathname !== '/filters') {
+      nav(`/?${next.toString()}`)
+    }
+  }
+
+  const setCategory = (id: string) => {
+    const next = new URLSearchParams(params)
+    if (id === 'all') next.delete('cat')
+    else next.set('cat', id)
+    setParams(next, { replace: true })
+    if (loc.pathname !== '/' && loc.pathname !== '/filters') {
+      nav(`/?${next.toString()}`)
+    }
+  }
+
   return (
-    <div className="min-h-svh font-sans text-zinc-900 dark:text-zinc-50">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        {/* Light mode background */}
-        <div className="absolute inset-0 dark:hidden">
-          {/* Base: ivory-white canvas */}
-          <div className="absolute inset-0 bg-[#fdfaf6]" />
-          {/* Top-left: warm orange sunrise orb */}
-          <div className="absolute -left-32 -top-32 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(251,146,60,.55)_0%,rgba(249,115,22,.28)_40%,transparent_70%)] blur-3xl" />
-          {/* Top-right: soft amber glow */}
-          <div className="absolute -right-20 -top-20 h-[380px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(253,186,116,.45)_0%,rgba(251,146,60,.18)_50%,transparent_75%)] blur-2xl" />
-          {/* Center: creamy highlight */}
-          <div className="absolute left-1/2 top-1/3 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,237,213,.80)_0%,transparent_65%)] blur-2xl" />
-          {/* Bottom-right: lavender / purple bloom */}
-          <div className="absolute -bottom-24 -right-24 h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle,rgba(196,181,253,.50)_0%,rgba(167,139,250,.22)_45%,transparent_70%)] blur-3xl" />
-          {/* Bottom-left: soft rose tint */}
-          <div className="absolute -bottom-16 left-1/4 h-[300px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(253,164,175,.30)_0%,rgba(251,113,133,.10)_50%,transparent_72%)] blur-2xl" />
-          {/* Subtle dot grid for depth */}
-          <div className="absolute inset-0 opacity-[0.055] [background-image:radial-gradient(circle,rgba(0,0,0,.55)_1px,transparent_1px)] [background-size:28px_28px]" />
-        </div>
-
-        {/* Dark mode background */}
-        <div className="hidden dark:absolute dark:inset-0 dark:block dark:bg-[#0f0f12]" />
-        <div className="hidden dark:absolute dark:-top-24 dark:left-1/2 dark:block dark:h-[520px] dark:w-[820px] dark:-translate-x-1/2 dark:rounded-full dark:bg-gradient-to-b dark:from-brand-500/18 dark:via-brand-500/10 dark:to-transparent dark:blur-3xl" />
-        <div className="hidden dark:absolute dark:-bottom-24 dark:left-1/3 dark:block dark:h-[420px] dark:w-[620px] dark:-translate-x-1/2 dark:rounded-full dark:bg-gradient-to-t dark:from-white/10 dark:via-white/5 dark:to-transparent dark:blur-3xl" />
-      </div>
-
-      <header className="sticky top-0 z-20 border-b border-orange-100/80 bg-white/75 shadow-[0_1px_0_rgba(249,115,22,.06)] backdrop-blur-xl dark:border-white/10 dark:bg-black/30">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => nav('/')}
-            className="rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500/70"
-          >
-            <BrandMark />
-          </button>
-
-          <div className="hidden flex-1 items-center justify-center md:flex">
-            <div className="flex w-full max-w-xl items-center gap-2 rounded-3xl border border-zinc-200/70 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-              <Search className="h-4 w-4 text-zinc-500" />
-              <input
-                placeholder={t('explore_search_placeholder')}
-                className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
-              />
-              <span className="inline-flex items-center gap-1 rounded-xl bg-brand-500/10 px-2 py-1 text-[12px] font-medium text-brand-700 dark:text-brand-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Nearby
+    <div className="min-h-svh bg-[#f8f7f5] font-sans text-zinc-900 dark:bg-[#0f0f12] dark:text-zinc-50">
+      
+      {/* ── HEADER ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/90 backdrop-blur-2xl dark:border-white/8 dark:bg-black/80">
+        <div className="mx-auto max-w-7xl px-4">
+          
+          {/* Row 1: Logo, Search, Actions */}
+          <div className="flex h-16 items-center gap-4 py-2 md:h-20">
+            {/* Logo */}
+            <Link to="/" className="flex shrink-0 items-center gap-2 outline-none">
+              <span className="text-[22px] font-black tracking-tighter text-orange-500">
+                🍊 ICHKO
               </span>
+            </Link>
+
+            {/* Dual Search Bar (Desktop) */}
+            <form 
+              onSubmit={handleSearch}
+              className="mx-4 hidden flex-1 md:block"
+            >
+              <div className="flex w-full max-w-3xl items-center gap-0 rounded-full border border-zinc-200 bg-zinc-50 p-1 shadow-sm transition-focus-within focus-within:border-orange-500/50 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-white/10 dark:bg-white/5">
+                {/* What */}
+                <div className="flex flex-1 items-center gap-3 px-4">
+                  <Search className="h-4 w-4 shrink-0 text-zinc-400" />
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Хайх: нэр, хаяг, vibe…"
+                    className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
+                  />
+                </div>
+                
+                <div className="h-6 w-px bg-zinc-200 dark:bg-white/10" />
+                
+                {/* Where */}
+                <div className="flex flex-1 items-center gap-3 px-4">
+                  <MapPin className="h-4 w-4 shrink-0 text-zinc-400" />
+                  <div className={cn(
+                    "w-full truncate text-[14px] font-medium",
+                    hasLocation ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
+                  )}>
+                    {hasLocation ? "Миний байршил ✓" : "Байршил оруулах..."}
+                  </div>
+                </div>
+
+                {/* Search Button */}
+                <button
+                  type="submit"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white transition hover:bg-orange-600 active:scale-95"
+                >
+                  <Search className="h-4.5 w-4.5" />
+                </button>
+              </div>
+            </form>
+
+            {/* Actions */}
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
+              {/* Mobile Search Icon */}
+              <button 
+                className="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8 md:hidden"
+                onClick={() => nav('/filters')} // or open search modal
+              >
+                <Search className="h-5 w-5" />
+              </button>
+
+              <button
+                onClick={() => setLang(lang === 'mn' ? 'en' : 'mn')}
+                className="hidden h-10 px-3 text-[13px] font-bold text-zinc-600 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8 sm:block"
+              >
+                {lang === 'mn' ? 'MN' : 'EN'}
+              </button>
+
+              <button
+                onClick={() => {
+                  const next = theme === 'dark' ? 'light' : 'dark'
+                  setTheme(next); applyTheme(next)
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8"
+              >
+                {theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setLang(lang === 'mn' ? 'en' : 'mn')}
-              className="inline-flex items-center gap-2 rounded-3xl bg-zinc-100/80 px-3 py-2 text-[13px] font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-200/80 dark:bg-white/10 dark:text-zinc-100 dark:hover:bg-white/15"
-              title="Language"
-              aria-label="Language"
-            >
-              {lang === 'mn' ? t('lang_mn') : t('lang_en')}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                const next: ThemeMode = theme === 'dark' ? 'light' : 'dark'
-                setTheme(next)
-                applyTheme(next)
-              }}
-              className="inline-flex items-center gap-2 rounded-3xl bg-zinc-100/80 px-3 py-2 text-[13px] font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-200/80 dark:bg-white/10 dark:text-zinc-100 dark:hover:bg-white/15"
-              aria-label={`Switch theme (current ${themeLabel})`}
-              title="Theme"
-            >
-              {theme === 'dark' ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-              <span className="hidden md:inline">{themeLabel}</span>
-            </button>
-
-            <Link
-              to="/favorites"
-              className="inline-flex items-center gap-2 rounded-3xl bg-zinc-100/80 px-3 py-2 text-[13px] font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-200/80 dark:bg-white/10 dark:text-zinc-100 dark:hover:bg-white/15 md:hidden"
-              aria-label={t('nav_favorites')}
-              title={t('nav_favorites')}
-            >
-              <Bookmark className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('nav_favorites')}</span>
-            </Link>
-
-            <nav className="hidden items-center gap-1 md:flex">
-              {DESKTOP_NAV.map((item) => {
-              const Icon = item.icon
-              const isActive = active(item.to)
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    'inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[13px] font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-brand-500/70',
-                    isActive
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-black'
-                      : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10',
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {t(item.labelKey)}
-                </Link>
-              )
+          {/* Row 2: Nav + Category Pills (Desktop) */}
+          <div className="hidden h-12 items-center justify-between border-t border-zinc-100 py-1 dark:border-white/5 md:flex">
+            <nav className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon
+                const isActive = active(item.to)
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      'flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition',
+                      isActive
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                        : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/8 dark:hover:text-white',
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {t(item.labelKey)}
+                  </Link>
+                )
               })}
             </nav>
+
+            <div className="flex items-center gap-2">
+               <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mr-2">Шүүх:</span>
+               {CATEGORIES.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategory(c.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold transition",
+                    currentCat === c.id
+                      ? "bg-orange-500 text-white shadow-sm"
+                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
+                  )}
+                >
+                  <span>{c.emoji}</span>
+                  {c.label}
+                </button>
+               ))}
+            </div>
           </div>
         </div>
+
+        {/* Mobile Category Bar (Only on home) */}
+        {loc.pathname === '/' && (
+          <div className="flex items-center gap-2 overflow-x-auto border-t border-zinc-100 px-4 py-2 [-ms-overflow-style:none] [scrollbar-width:none] dark:border-white/5 md:hidden [&::-webkit-scrollbar]:hidden">
+            {CATEGORIES.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setCategory(c.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold transition",
+                  currentCat === c.id
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                    : "bg-zinc-100 text-zinc-600 dark:bg-white/5 dark:text-zinc-400"
+                )}
+              >
+                <span>{c.emoji}</span>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
-      <main className="relative mx-auto max-w-6xl px-4 py-6 pb-24 md:pb-6">
-        <Outlet />
+      {/* ── MAIN ───────────────────────────────────────────────── */}
+      <main className={cn(
+        "relative mx-auto max-w-7xl px-4 py-6 md:py-8",
+        "pb-28 md:pb-8" // Add padding for mobile nav
+      )}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={loc.pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-orange-100/80 bg-white/80 shadow-[0_-1px_0_rgba(249,115,22,.06)] backdrop-blur-xl dark:border-white/10 dark:bg-black/40 md:hidden">
-        <div className="mx-auto grid max-w-6xl grid-cols-4 px-2 py-2">
-          {MOBILE_NAV.map((item) => {
+      {/* ── MOBILE NAV (Bottom Tab Bar) ───────────────────────── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-200 bg-white/95 backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/95 md:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-5 px-2 py-1">
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const isActive = active(item.to)
             return (
@@ -194,14 +257,27 @@ export function AppLayout() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  'mx-1 flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-brand-500/70',
-                  isActive
-                    ? 'bg-brand-500/10 text-brand-700 dark:text-brand-200'
-                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10',
+                  'relative flex flex-col items-center justify-center gap-1 py-2 transition-colors',
+                  isActive ? 'text-orange-500' : 'text-zinc-400 dark:text-zinc-500'
                 )}
               >
-                <Icon className="h-5 w-5" />
-                {t(item.labelKey)}
+                {/* Active Indicator Dot */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-dot"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute top-0.5 h-1 w-1 rounded-full bg-orange-500"
+                    />
+                  )}
+                </AnimatePresence>
+                
+                <Icon className={cn('h-5.5 w-5.5 transition-transform', isActive && 'scale-110')} />
+                <span className="text-[10px] font-bold tracking-tight">
+                  {t(item.labelKey).split(' ')[0]} {/* Shorten labels for mobile if needed */}
+                </span>
               </Link>
             )
           })}
@@ -210,4 +286,3 @@ export function AppLayout() {
     </div>
   )
 }
-

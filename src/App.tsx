@@ -8,6 +8,7 @@ import { BookingsPage } from './pages/BookingsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AboutPage } from './pages/AboutPage'
 import { FiltersPage } from './pages/FiltersPage'
+import { PlaceReviewsPage } from './pages/PlaceReviewsPage'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/me" element={<ProfilePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/place/:placeId" element={<PlaceDetailsPage />} />
+        <Route path="/place/:placeId/reviews" element={<PlaceReviewsPage />} />
         <Route path="/place/:placeId/book" element={<BookingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

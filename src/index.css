@@ -1,79 +1,116 @@
 @import 'tailwindcss';
 
+/* ── Font & colour-scheme ──────────────────────────────────── */
 html {
   color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-
-html.dark {
-  color-scheme: dark;
-}
-
-html,
-body {
-  height: 100%;
-}
+html.dark { color-scheme: dark; }
 
 body {
   margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
-  /* Light mode base — ivory warm white */
-  background-color: #fdfaf6;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
+    Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  background-color: #f8f7f5;
 }
 
-/* Apple-like selection */
+/* ── Selection ──────────────────────────────────────────────── */
 ::selection {
-  background: color-mix(in oklab, rgb(249 115 22) 25%, transparent);
+  background: color-mix(in oklab, #f97316 20%, transparent);
 }
 
-/* ── Light mode: premium card glass ─────────────────────────────── */
+/* ── CSS tokens ─────────────────────────────────────────────── */
 :root {
-  --glass-bg:    rgba(255, 250, 244, 0.72);
-  --glass-border: rgba(249, 115, 22, 0.10);
+  --brand: #f97316;
+  --brand-soft: rgba(249,115,22,.10);
+  --surface: rgba(255,255,255,.80);
+  --border: rgba(0,0,0,.07);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,.10);
+}
+.dark {
+  --surface: rgba(24,24,27,.80);
+  --border: rgba(255,255,255,.09);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
 }
 
-/* ── Custom range input styling ──────────────────────────────────── */
+/* ── Range input ────────────────────────────────────────────── */
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
+  width: 100%;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(0,0,0,.10);
 }
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18), 0 1px 4px rgba(0,0,0,.15);
-  border: 2px solid #fff;
-  margin-top: -7px;
-  transition: transform 0.15s ease;
+  border: 2.5px solid #fff;
+  box-shadow: 0 0 0 3px rgba(249,115,22,.18), 0 2px 6px rgba(0,0,0,.14);
+  margin-top: -8.5px;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 input[type='range']::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-input[type='range']::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 9999px;
-  background: rgba(0,0,0,.08);
+  transform: scale(1.12);
+  box-shadow: 0 0 0 5px rgba(249,115,22,.22), 0 2px 8px rgba(0,0,0,.18);
 }
 
-/* ── Smooth scrollbar ────────────────────────────────────────────── */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(249,115,22,.25) transparent;
-}
-::-webkit-scrollbar { width: 5px; height: 5px; }
+/* ── Scrollbar ──────────────────────────────────────────────── */
+* { scrollbar-width: thin; scrollbar-color: rgba(249,115,22,.22) transparent; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgba(249,115,22,.22);
+  background: rgba(249,115,22,.20);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(249,115,22,.40);
+::-webkit-scrollbar-thumb:hover { background: rgba(249,115,22,.38); }
+
+/* ── Utility helpers ─────────────────────────────────────────── */
+.card-glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
+.card-glass:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Yelp-style divider */
+.yelp-divider {
+  @apply border-t border-zinc-100 dark:border-white/8 my-6;
+}
+
+/* Section header (Yelp style) */
+.section-header {
+  @apply text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500 mb-3;
+}
+
+/* Clean input */
+.input-clean {
+  @apply w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-[14px]
+         outline-none transition-all
+         focus:border-brand-400 focus:ring-2 focus:ring-brand-500/15
+         dark:border-white/10 dark:bg-zinc-900 dark:text-white;
+}
+
+/* Price badge */
+.price-badge {
+  @apply text-zinc-500 font-semibold text-[13px];
+}
+
+/* Rating stars */
+.star-filled { @apply text-amber-400; }
+.star-empty  { @apply text-zinc-200 dark:text-zinc-700; }
+
