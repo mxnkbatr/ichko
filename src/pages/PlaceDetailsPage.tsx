@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-  ArrowLeft, MapPin, Phone, Clock, 
-  ChevronRight, Share2, Heart, ExternalLink, 
+import {
+  ArrowLeft, MapPin, Phone, Clock,
+  ChevronRight, Share2, Heart, ExternalLink,
   Calendar, Check, Info
 } from 'lucide-react'
 import { places as allPlaces } from '../data/places'
@@ -13,7 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "lg" }) {
   const fullStars = Math.floor(rating)
   const stars = Array.from({ length: 5 }, (_, i) => i < fullStars ? '★' : '☆')
-  
+
   return (
     <div className={cn(
       "flex items-center text-orange-500 tracking-tight",
@@ -43,7 +44,7 @@ export function PlaceDetailsPage() {
   const { placeId } = useParams()
   const nav = useNavigate()
   const place = allPlaces.find(p => p.id === placeId)
-  
+
   const [activePhoto, setActivePhoto] = useState(0)
   const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0])
   const [bookingTime, setBookingTime] = useState('19:00')
@@ -110,7 +111,7 @@ export function PlaceDetailsPage() {
               className="h-full w-full object-cover"
             />
           </AnimatePresence>
-          
+
           {/* Action Overlay */}
           <div className="absolute right-4 top-4 flex gap-2">
             <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur shadow-sm hover:bg-white transition-colors">
@@ -121,7 +122,7 @@ export function PlaceDetailsPage() {
             </button>
           </div>
         </div>
-        
+
         {/* Thumbnails */}
         <div className="flex gap-2 overflow-x-auto px-4 pb-2 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-white/5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-4 md:px-0">
           {place.photos.map((ph, idx) => (
@@ -147,10 +148,10 @@ export function PlaceDetailsPage() {
 
       {/* ── TWO COLUMN CONTENT ─────────────────────────────────── */}
       <div className="px-4 md:px-0 grid gap-8 lg:grid-cols-[1fr_380px]">
-        
+
         {/* LEFT COLUMN: Info, Menu, Reviews */}
         <div className="min-w-0 space-y-12">
-          
+
           {/* Business Header */}
           <section>
             <h1 className="text-[32px] md:text-[42px] font-black tracking-tight text-zinc-950 dark:text-white leading-tight">
@@ -223,8 +224,8 @@ export function PlaceDetailsPage() {
                     onClick={() => setMenuTab(tag)}
                     className={cn(
                       "whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-bold transition",
-                      menuTab === tag 
-                        ? "bg-zinc-900 text-white dark:bg-white dark:text-black" 
+                      menuTab === tag
+                        ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
                         : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10"
                     )}
                   >
@@ -233,11 +234,11 @@ export function PlaceDetailsPage() {
                 ))}
               </div>
             </div>
-            
+
             <div className="space-y-1">
               {filteredMenu.map((item, idx) => (
-                <div 
-                  key={item.id} 
+                <div
+                  key={item.id}
                   className={cn(
                     "flex items-center justify-between py-4",
                     idx !== filteredMenu.length - 1 && "border-b border-zinc-100/50 dark:border-white/5"
@@ -297,17 +298,17 @@ export function PlaceDetailsPage() {
           <section>
             <h2 className="mb-4 text-[22px] font-black tracking-tight">Байршил</h2>
             <div className="h-64 overflow-hidden rounded-3xl border border-zinc-200 dark:border-white/10 shadow-sm">
-              <OsmMap 
-                places={[place]} 
-                selectedId={place.id} 
-                interactive={false} 
+              <OsmMap
+                places={[place]}
+                selectedId={place.id}
+                interactive={false}
               />
             </div>
             <div className="mt-4 flex items-center justify-between gap-4">
               <div className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">
                 {place.address}
               </div>
-              <a 
+              <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${place.coords.lat},${place.coords.lng}`}
                 target="_blank"
                 rel="noreferrer"
@@ -350,8 +351,8 @@ export function PlaceDetailsPage() {
                       onClick={() => setPartySize(size)}
                       className={cn(
                         "flex h-10 min-w-[40px] items-center justify-center rounded-xl text-[14px] font-bold transition",
-                        partySize === size 
-                          ? "bg-orange-500 text-white" 
+                        partySize === size
+                          ? "bg-orange-500 text-white"
                           : "bg-zinc-100 text-zinc-600 dark:bg-white/5 dark:text-zinc-400"
                       )}
                     >
@@ -371,8 +372,8 @@ export function PlaceDetailsPage() {
                       onClick={() => setBookingTime(slot)}
                       className={cn(
                         "rounded-xl py-2.5 text-[12px] font-bold transition",
-                        bookingTime === slot 
-                          ? "bg-zinc-900 text-white dark:bg-white dark:text-black" 
+                        bookingTime === slot
+                          ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
                           : "border border-zinc-200 bg-white hover:border-zinc-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
                       )}
                     >
@@ -402,7 +403,7 @@ export function PlaceDetailsPage() {
               </button>
             </div>
           </div>
-          
+
           <div className="mt-4 flex items-center gap-2 rounded-2xl bg-zinc-50 p-4 dark:bg-white/5">
             <Info className="h-5 w-5 text-zinc-400" />
             <p className="text-[11px] text-zinc-500">Захиалга баталгаажуулахын тулд таны утасны дугаар шаардлагатай.</p>
@@ -436,7 +437,7 @@ export function PlaceDetailsPage() {
             >
               {/* Drag handle */}
               <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-zinc-300 dark:bg-white/20" />
-              
+
               <button
                 onClick={() => setBookingSheetOpen(false)}
                 className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/5"
@@ -473,8 +474,8 @@ export function PlaceDetailsPage() {
                           onClick={() => setPartySize(size)}
                           className={cn(
                             "flex h-10 min-w-[40px] items-center justify-center rounded-xl text-[14px] font-bold transition",
-                            partySize === size 
-                              ? "bg-orange-500 text-white" 
+                            partySize === size
+                              ? "bg-orange-500 text-white"
                               : "bg-zinc-100 text-zinc-600 dark:bg-white/5 dark:text-zinc-400"
                           )}
                         >
@@ -494,8 +495,8 @@ export function PlaceDetailsPage() {
                           onClick={() => setBookingTime(slot)}
                           className={cn(
                             "rounded-xl py-2.5 text-[12px] font-bold transition",
-                            bookingTime === slot 
-                              ? "bg-zinc-900 text-white dark:bg-white dark:text-black" 
+                            bookingTime === slot
+                              ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
                               : "border border-zinc-200 bg-white hover:border-zinc-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
                           )}
                         >

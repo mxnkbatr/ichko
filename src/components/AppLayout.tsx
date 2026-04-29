@@ -270,7 +270,7 @@ export function AppLayout() {
               onClick={() => setMenuOpen(false)}
               className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-md dark:bg-black/40"
             />
-            
+
             {/* Drawer */}
             <motion.div
               initial={{ x: '100%' }}
@@ -350,8 +350,8 @@ export function AppLayout() {
                         onClick={() => setLang('mn')}
                         className={cn(
                           "flex-1 rounded-xl py-2.5 text-[13px] font-bold transition-all",
-                          lang === 'mn' 
-                            ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-white" 
+                          lang === 'mn'
+                            ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-white"
                             : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                         )}
                       >
@@ -361,8 +361,8 @@ export function AppLayout() {
                         onClick={() => setLang('en')}
                         className={cn(
                           "flex-1 rounded-xl py-2.5 text-[13px] font-bold transition-all",
-                          lang === 'en' 
-                            ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-white" 
+                          lang === 'en'
+                            ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-white"
                             : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                         )}
                       >

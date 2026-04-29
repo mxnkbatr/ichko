@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { 
-  Settings, Moon, Sun, Languages, 
+import {
+  Settings, Moon, Sun, Languages,
   Trash2, LogOut, History,
   Bookmark, CalendarCheck, Star
 } from 'lucide-react'
@@ -16,7 +16,7 @@ import { cn } from '../lib/cn'
 export function ProfilePage() {
   const { lang, setLang } = useI18n()
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme() ?? 'light')
-  
+
   const bookings = listBookings()
   const favorites = getFavorites()
   const [recentIds, setRecentIds] = useState<string[]>([])
@@ -134,7 +134,7 @@ export function ProfilePage() {
             <h2 className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 flex items-center gap-2">
               <History className="h-3.5 w-3.5" /> Сүүлд үзсэн газрууд
             </h2>
-            <button 
+            <button
               onClick={() => { localStorage.removeItem('ichko.recentlyViewed'); setRecentIds([]) }}
               className="text-[11px] font-bold text-zinc-400 hover:text-rose-500"
             >
@@ -151,7 +151,7 @@ export function ProfilePage() {
 
       {/* Danger Zone */}
       <div className="flex flex-col gap-3">
-        <button 
+        <button
           onClick={() => { localStorage.clear(); window.location.reload() }}
           className="flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 py-4 text-[14px] font-bold text-rose-600 transition hover:bg-rose-100 dark:border-rose-500/10 dark:bg-rose-500/5 dark:text-rose-400"
         >
