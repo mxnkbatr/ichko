@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { 
-  ArrowLeft, MapPin, Phone, Clock, Star, 
+  ArrowLeft, MapPin, Phone, Clock, 
   ChevronRight, Share2, Heart, ExternalLink, 
-  Users, Calendar, Check, Info
+  Calendar, Check, Info
 } from 'lucide-react'
-import { places as allPlaces, type Place } from '../data/places'
+import { places as allPlaces } from '../data/places'
 import { OsmMap } from '../components/OsmMap'
 import { cn } from '../lib/cn'
 import { motion, AnimatePresence } from 'framer-motion'

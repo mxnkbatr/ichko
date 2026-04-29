@@ -1,8 +1,7 @@
-import { useEffect, useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { 
-  User, Settings, Moon, Sun, Languages, 
-  Trash2, LogOut, ChevronRight, History,
+  Settings, Moon, Sun, Languages, 
+  Trash2, LogOut, History,
   Bookmark, CalendarCheck, Star
 } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -15,7 +14,7 @@ import { useI18n } from '../lib/i18n'
 import { cn } from '../lib/cn'
 
 export function ProfilePage() {
-  const { lang, setLang, t } = useI18n()
+  const { lang, setLang } = useI18n()
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme() ?? 'light')
   
   const bookings = listBookings()

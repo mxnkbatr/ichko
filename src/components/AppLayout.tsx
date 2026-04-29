@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Moon, Bookmark, CalendarCheck, SlidersHorizontal, Sun, User, Search, MapPin,
-  Compass, Menu, X, Info, HelpCircle, Languages, Bell, Shield,
+  Compass, Menu, X, Info, HelpCircle, Bell, Shield,
   ChevronRight
 } from 'lucide-react'
 import { cn } from '../lib/cn'
