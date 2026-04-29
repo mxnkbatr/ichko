@@ -4,6 +4,13 @@ export type UbDistrict = 'СБД' | 'БГД' | 'СХД'
 
 export type VibeTag = 'chill' | 'party' | 'romantic' | 'family' | 'work' | 'music' | 'craft'
 
+export const CATEGORIES = [
+  { id: 'all' as const,        emoji: '🗺️', label: 'Бүгд' },
+  { id: 'restaurant' as const, emoji: '🍽️', label: 'Ресторан' },
+  { id: 'cafe' as const,       emoji: '☕', label: 'Кафе' },
+  { id: 'pub' as const,        emoji: '🍺', label: 'Паб/Бар' },
+]
+
 export type MenuItem = {
   id: string
   name: string

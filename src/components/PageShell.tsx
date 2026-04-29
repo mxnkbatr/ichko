@@ -12,25 +12,24 @@ export function PageShell({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-4xl">
+      {/* Page Header */}
+      <div className="mb-8 flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-[24px] font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+          <h1 className="text-[28px] font-black tracking-tight text-zinc-950 dark:text-zinc-50">
             {title}
-          </div>
+          </h1>
           {subtitle ? (
-            <div className="mt-1 text-[13px] text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
               {subtitle}
-            </div>
+            </p>
           ) : null}
         </div>
         {right ? <div className="shrink-0">{right}</div> : null}
       </div>
 
-      <div className="rounded-3xl border border-zinc-200 bg-white/70 p-5 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-        {children}
-      </div>
+      {/* Content — NO wrapper card, just children directly */}
+      <div>{children}</div>
     </div>
   )
 }
-

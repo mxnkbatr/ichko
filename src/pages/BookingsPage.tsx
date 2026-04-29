@@ -1,20 +1,17 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { 
   Calendar, Clock, Users, MapPin, 
-  Plus, X, RotateCcw, XCircle, ChevronDown,
-  CalendarCheck2, Search
+  Plus, RotateCcw, XCircle,
+  Search
 } from 'lucide-react'
 import { cancelBooking, listBookings, rescheduleBooking } from '../lib/bookings'
 import { getPlaceById } from '../data/places'
 import { generateSlots, todayIso } from '../lib/time'
 import { cn } from '../lib/cn'
-import { useI18n } from '../lib/i18n'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function BookingsPage() {
-  const { t } = useI18n()
-  const [sp, setSp] = useSearchParams()
   const bookings = listBookings()
   const confirmed = bookings.filter((b) => b.status === 'confirmed')
   const cancelled = bookings.filter((b) => b.status === 'cancelled')
@@ -46,7 +43,7 @@ export function BookingsPage() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[3rem] border border-zinc-100 bg-white py-24 text-center dark:border-white/5 dark:bg-white/3">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-zinc-100 bg-white py-20 text-center dark:border-white/5 dark:bg-zinc-900/40">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-50 text-[32px] dark:bg-white/5">
             📅
           </div>
@@ -65,9 +62,11 @@ export function BookingsPage() {
           {/* Confirmed Section */}
           {confirmed.length > 0 && (
             <section>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                <h2 className="text-[13px] font-black uppercase tracking-[0.15em] text-zinc-400">БАТАЛГААЖСАН ({confirmed.length})</h2>
+              <div className="mb-4 flex items-center gap-2.5 pb-3 border-b border-zinc-100 dark:border-white/5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 flex-none" />
+                <h2 className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400">
+                  БАТАЛГААЖСАН ({confirmed.length})
+                </h2>
               </div>
               <motion.div 
                 variants={{
@@ -213,9 +212,11 @@ export function BookingsPage() {
           {/* Cancelled Section */}
           {cancelled.length > 0 && (
             <section>
-              <div className="mb-4 flex items-center gap-3 opacity-50">
-                <div className="h-2 w-2 rounded-full bg-rose-500" />
-                <h2 className="text-[13px] font-black uppercase tracking-[0.15em] text-zinc-400">ЦУЦЛАГДСАН ({cancelled.length})</h2>
+              <div className="mb-4 flex items-center gap-2.5 pb-3 border-b border-zinc-100 dark:border-white/5 opacity-50">
+                <span className="h-2 w-2 rounded-full bg-rose-500 flex-none" />
+                <h2 className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400">
+                  ЦУЦЛАГДСАН ({cancelled.length})
+                </h2>
               </div>
               <div className="space-y-3 opacity-60">
                 {cancelled.map((b) => (
