@@ -6,10 +6,20 @@ import {
   Search
 } from 'lucide-react'
 import { cancelBooking, listBookings, rescheduleBooking } from '../lib/bookings'
-import { getPlaceById } from '../data/places'
+import { places as allPlaces, getPlaceById } from '../data/places'
 import { generateSlots, todayIso } from '../lib/time'
 import { cn } from '../lib/cn'
 import { motion, AnimatePresence } from 'framer-motion'
+
+// ── Stars Helper ─────────────────────────────────────────────────────────────
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5 text-orange-500">
+      <span className="text-[14px]">★</span>
+      <span className="text-[12px] font-black text-zinc-900 dark:text-zinc-100">{rating.toFixed(1)}</span>
+    </div>
+  )
+}
 
 export function BookingsPage() {
   const bookings = listBookings()
@@ -29,33 +39,63 @@ export function BookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
+    <div className="mx-auto max-w-2xl px-4 py-6 md:py-10">
       {/* Header */}
       <div className="mb-10 flex items-center justify-between">
-        <h1 className="text-[32px] font-black tracking-tight text-zinc-950 dark:text-white">Миний захиалгууд</h1>
+        <h1 className="text-[28px] font-black tracking-tight text-zinc-950 dark:text-white md:text-[32px]">Миний захиалгууд</h1>
         <Link
           to="/"
-          className="flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 text-[14px] font-bold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 active:scale-95"
+          className="flex items-center gap-1.5 rounded-full bg-orange-500 px-4 py-2 text-[13px] font-black text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 active:scale-95"
         >
-          <Plus className="h-4.5 w-4.5" />
-          Шинэ захиалга
+          <Plus className="h-4 w-4 stroke-[3px]" />
+          Шинэ
         </Link>
       </div>
 
       {bookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-zinc-100 bg-white py-20 text-center dark:border-white/5 dark:bg-zinc-900/40">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-50 text-[32px] dark:bg-white/5">
-            📅
+        <div className="space-y-12">
+          <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-zinc-100 bg-white py-16 text-center shadow-2xl shadow-zinc-200/50 dark:border-white/5 dark:bg-zinc-900/40 dark:shadow-none">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 scale-150 rounded-full bg-orange-500/10 blur-2xl" />
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-white shadow-xl dark:bg-zinc-800">
+                <Calendar className="h-10 w-10 text-orange-500" strokeWidth={1.5} />
+              </div>
+            </div>
+            <h2 className="text-[18px] font-black text-zinc-950 dark:text-white">Одоогоор захиалга байхгүй байна</h2>
+            <p className="mt-2 max-w-[200px] text-[14px] font-medium text-zinc-400">Шинэ газар хайж ширээ захиалаарай.</p>
+            <Link
+              to="/"
+              className="mt-8 flex items-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-[14px] font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95"
+            >
+              <Search className="h-4 w-4" />
+              Газар хайж захиалах
+            </Link>
           </div>
-          <h2 className="mt-6 text-[20px] font-black text-zinc-900 dark:text-white">Одоогоор захиалга байхгүй байна</h2>
-          <p className="mt-2 text-[15px] text-zinc-500">Шинэ газар хайж ширээ захиалаарай.</p>
-          <Link
-            to="/"
-            className="mt-8 flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3.5 text-[14px] font-bold text-white transition hover:bg-zinc-800 dark:bg-white dark:text-black"
-          >
-            <Search className="h-4 w-4" />
-            Газар хайж захиалах
-          </Link>
+
+          {/* Recommended Section (Simplified for now) */}
+          <section>
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">Танд санал болгох</h3>
+              <Link to="/" className="text-[12px] font-bold text-orange-500">Бүгдийг харах</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {allPlaces.slice(0, 3).map(p => (
+                <Link key={p.id} to={`/place/${p.id}`} className="w-[200px] shrink-0 group">
+                  <div className="aspect-[4/3] w-full overflow-hidden rounded-3xl bg-zinc-100">
+                    <img src={p.photos[0]?.url} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="font-bold text-zinc-900 dark:text-white line-clamp-1">{p.name}</h4>
+                    <div className="mt-0.5 flex items-center gap-2 text-[12px] text-zinc-500">
+                      <div className="flex items-center gap-1 text-orange-500">
+                        <StarRating rating={p.rating} />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       ) : (
         <div className="space-y-12">

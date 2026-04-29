@@ -73,7 +73,7 @@ export function SearchBar({
   }
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="hidden w-full max-w-2xl md:block">
       <div className="relative flex w-full items-center gap-2 rounded-[2rem] border border-zinc-200/60 bg-white/60 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4 shrink-0 text-zinc-500" />
         <input

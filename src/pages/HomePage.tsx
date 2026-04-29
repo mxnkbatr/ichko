@@ -4,7 +4,7 @@ import {
   SlidersHorizontal,
   MapPin, X, ChevronDown, Map as MapIcon,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
 import { places as allPlaces, type PlaceCategory, CATEGORIES } from '../data/places'
 import { PlaceCard } from '../components/PlaceCard'
 import { OsmMap } from '../components/OsmMap'
@@ -79,6 +79,17 @@ export function HomePage() {
   const [selectedId, setSelectedId] = useState<string | undefined>()
   const [userLoc] = useState<{ lat: number; lng: number } | null>(null)
   const [mapSheetOpen, setMapSheetOpen] = useState(false)
+  const [showMapBtn, setShowMapBtn] = useState(true)
+  const { scrollY } = useScroll()
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0
+    if (latest > previous && latest > 150) {
+      setShowMapBtn(false)
+    } else {
+      setShowMapBtn(true)
+    }
+  })
 
   // Filter State
   const cat = (params.get('cat') ?? 'all') as 'all' | PlaceCategory
@@ -135,16 +146,16 @@ export function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── UNIFIED FILTER & CATEGORY BAR ─────────────────────── */}
-      <div className="sticky top-[64px] z-20 border-b border-zinc-200 bg-white/95 backdrop-blur-md dark:border-white/5 dark:bg-zinc-950/95 md:top-[80px]">
+      <div className="glass sticky top-[56px] z-20 border-b border-zinc-200/50 md:top-[80px]">
         <div className="mx-auto max-w-7xl px-4 py-2">
           {/* Categories (Mobile only - Desktop has it in header) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
             {CATEGORIES.map(c => (
               <button
                 key={c.id}
                 onClick={() => setParam('cat', c.id === 'all' ? '' : c.id)}
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold transition",
+                  "snap-start flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold transition",
                   cat === c.id
                     ? "bg-zinc-950 text-white dark:bg-white dark:text-black"
                     : "bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-zinc-400"
@@ -156,8 +167,8 @@ export function HomePage() {
             ))}
           </div>
 
-          {/* Filters Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {/* Filters Bar (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <CustomDropdown
               label="↕ Эрэмбэ"
               value={sort}
@@ -171,7 +182,7 @@ export function HomePage() {
             <button
               onClick={() => setParam('open', openNow ? '' : '1')}
               className={cn(
-                "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition",
+                "flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-semibold transition",
                 openNow
                   ? "border-orange-500 bg-orange-50 text-orange-600 dark:border-orange-500/50 dark:bg-orange-500/10 dark:text-orange-400"
                   : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
@@ -276,7 +287,9 @@ export function HomePage() {
                 {filtered.map((p, i) => (
                   <motion.div
                     key={p.id}
-                    onMouseEnter={() => setSelectedId(p.id)}
+                    onMouseEnter={() => {
+                      if (window.innerWidth > 768) setSelectedId(p.id)
+                    }}
                     variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
                   >
                     <PlaceCard
@@ -293,15 +306,24 @@ export function HomePage() {
       </div>
 
       {/* ── MOBILE MAP BUTTON ─────────────────────────────────── */}
-      <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 md:hidden">
-        <button
-          onClick={() => setMapSheetOpen(true)}
-          className="flex items-center gap-2 rounded-full bg-zinc-950/80 px-6 py-3 text-[14px] font-black text-white shadow-2xl backdrop-blur-xl transition active:scale-95 dark:bg-white/90 dark:text-black"
-        >
-          <MapIcon className="h-4 w-4" />
-          Газрын зураг
-        </button>
-      </div>
+      <AnimatePresence>
+        {showMapBtn && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+12px)] left-1/2 z-40 md:hidden"
+          >
+            <button
+              onClick={() => setMapSheetOpen(true)}
+              className="flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-[14px] font-black text-white shadow-2xl transition hover:scale-105 active:scale-95 dark:bg-white dark:text-black"
+            >
+              <MapIcon className="h-4 w-4" />
+              Газрын зураг
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── MOBILE MAP SHEET ──────────────────────────────────── */}
       <AnimatePresence>
@@ -315,9 +337,10 @@ export function HomePage() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 z-[60] h-[75dvh] overflow-hidden rounded-t-[2.5rem] bg-white shadow-2xl dark:bg-zinc-900 md:hidden"
+              className="fixed bottom-0 left-0 right-0 z-[60] h-[75dvh] overflow-hidden rounded-t-[2rem] bg-white shadow-2xl dark:bg-zinc-900 md:hidden"
             >
-              <div className="absolute left-1/2 top-3 h-1.5 w-12 -translate-x-1/2 rounded-full bg-zinc-200 dark:bg-white/10" />
+              {/* Drag handle */}
+              <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-zinc-300 dark:bg-white/20" />
               <button
                 onClick={() => setMapSheetOpen(false)}
                 className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur dark:bg-black/40"

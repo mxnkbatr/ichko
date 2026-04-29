@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { 
   ArrowLeft, MapPin, Phone, Clock, Star, 
@@ -41,24 +41,25 @@ const MOCK_REVIEWS = [
 const TIME_SLOTS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30']
 
 export function PlaceDetailsPage() {
-  const { id } = useParams()
+  const { placeId } = useParams()
   const nav = useNavigate()
-  const place = allPlaces.find(p => p.id === id)
+  const place = allPlaces.find(p => p.id === placeId)
   
   const [activePhoto, setActivePhoto] = useState(0)
   const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0])
   const [bookingTime, setBookingTime] = useState('19:00')
   const [partySize, setPartySize] = useState(2)
   const [menuTab, setMenuTab] = useState('Бүгд')
+  const [bookingSheetOpen, setBookingSheetOpen] = useState(false)
 
   // Recently Viewed Tracking
   useEffect(() => {
-    if (!id) return
+    if (!placeId) return
     const key = 'ichko.recentlyViewed'
     const stored = JSON.parse(localStorage.getItem(key) ?? '[]') as string[]
-    const next = [id, ...stored.filter(x => x !== id)].slice(0, 5)
+    const next = [placeId, ...stored.filter(x => x !== placeId)].slice(0, 5)
     localStorage.setItem(key, JSON.stringify(next))
-  }, [id])
+  }, [placeId])
 
   if (!place) return (
     <div className="flex flex-col items-center justify-center py-20">
@@ -83,19 +84,22 @@ export function PlaceDetailsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 md:py-8">
+    <div className="flex flex-col md:mx-auto md:max-w-7xl md:px-4 md:py-8 pb-32 md:pb-8">
       {/* Back Button */}
-      <button 
+      <button
         onClick={() => nav(-1)}
-        className="mb-6 flex items-center gap-2 text-[14px] font-bold text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+        className={cn(
+          "md:mb-6 md:flex md:items-center md:gap-2 md:text-[14px] md:font-bold md:text-zinc-600 dark:md:text-zinc-400 transition-colors",
+          "fixed top-3 left-3 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur dark:bg-zinc-900/90 md:relative md:top-auto md:left-auto md:h-auto md:w-auto md:bg-transparent md:shadow-none md:backdrop-blur-none"
+        )}
       >
-        <ArrowLeft className="h-4 w-4" />
-        Буцах
+        <ArrowLeft className="h-5 w-5" />
+        <span className="hidden md:inline ml-1">Буцах</span>
       </button>
 
       {/* ── PHOTO GALLERY ──────────────────────────────────────── */}
-      <section className="mb-8 overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-800 shadow-sm">
-        <div className="relative h-64 w-full md:h-[420px]">
+      <section className="mb-6 md:mb-8 overflow-hidden md:rounded-3xl bg-zinc-100 dark:bg-zinc-800 shadow-sm">
+        <div className="relative h-72 w-full md:h-[420px]">
           <AnimatePresence mode="wait">
             <motion.img
               key={activePhoto}
@@ -120,13 +124,13 @@ export function PlaceDetailsPage() {
         </div>
         
         {/* Thumbnails */}
-        <div className="flex gap-2 overflow-x-auto p-4 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-white/5 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto px-4 pb-2 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-white/5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-4 md:px-0">
           {place.photos.map((ph, idx) => (
             <button
               key={idx}
               onClick={() => setActivePhoto(idx)}
               className={cn(
-                "h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all",
+                "h-16 w-16 shrink-0 md:w-full md:h-32 overflow-hidden rounded-xl border-2 transition-all",
                 activePhoto === idx ? "border-orange-500 scale-95" : "border-transparent opacity-60 hover:opacity-100"
               )}
             >
@@ -134,7 +138,7 @@ export function PlaceDetailsPage() {
             </button>
           ))}
           {place.photos.length > 5 && (
-            <button className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-xl bg-zinc-100 text-[11px] font-bold text-zinc-500 dark:bg-white/5">
+            <button className="flex h-16 w-24 shrink-0 md:w-full md:h-20 flex-col items-center justify-center rounded-xl bg-zinc-100 text-[11px] font-bold text-zinc-500 dark:bg-white/5">
               <span>+{place.photos.length - 5}</span>
               <span>зураг үзэх</span>
             </button>
@@ -143,7 +147,7 @@ export function PlaceDetailsPage() {
       </section>
 
       {/* ── TWO COLUMN CONTENT ─────────────────────────────────── */}
-      <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+      <div className="px-4 md:px-0 grid gap-8 lg:grid-cols-[1fr_380px]">
         
         {/* LEFT COLUMN: Info, Menu, Reviews */}
         <div className="min-w-0 space-y-12">
@@ -406,6 +410,115 @@ export function PlaceDetailsPage() {
           </div>
         </aside>
       </div>
+
+      {/* ── MOBILE FIXED BOOKING BAR ───────────────────────────── */}
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-zinc-100 bg-white/95 backdrop-blur-xl p-4 dark:border-white/5 dark:bg-zinc-950/95 md:hidden">
+        <button
+          onClick={() => setBookingSheetOpen(true)}
+          className="w-full rounded-2xl bg-orange-500 py-4 text-[16px] font-black text-white shadow-lg shadow-orange-500/30 active:scale-[0.98] transition-transform"
+        >
+          Захиалга хийх
+        </button>
+      </div>
+
+      {/* ── MOBILE BOOKING SHEET ────────────────────────────────── */}
+      <AnimatePresence>
+        {bookingSheetOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setBookingSheetOpen(false)}
+              className="fixed inset-0 z-[50] bg-black/40 backdrop-blur-sm md:hidden"
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 left-0 right-0 z-[60] max-h-[85dvh] overflow-hidden rounded-t-[2rem] bg-white shadow-2xl dark:bg-zinc-900 md:hidden"
+            >
+              {/* Drag handle */}
+              <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-zinc-300 dark:bg-white/20" />
+              
+              <button
+                onClick={() => setBookingSheetOpen(false)}
+                className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/5"
+              >
+                <Check className="h-5 w-5 rotate-45" />
+              </button>
+
+              <div className="overflow-y-auto p-6 pt-10 pb-12">
+                <h3 className="text-xl font-black tracking-tight text-zinc-950 dark:text-white">Ширээ захиалах</h3>
+                <p className="mt-1 text-[13px] text-zinc-500">Үнэгүй, хурдан захиалга</p>
+
+                <div className="mt-6 space-y-5">
+                  {/* Date */}
+                  <div>
+                    <label className="mb-2 block text-[11px] font-black uppercase tracking-widest text-zinc-400">Өдөр</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        type="date"
+                        value={bookingDate}
+                        onChange={e => setBookingDate(e.target.value)}
+                        className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 py-3.5 pl-12 pr-4 text-[14px] font-bold outline-none focus:border-orange-500 dark:border-white/10 dark:bg-white/5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Party Size */}
+                  <div>
+                    <label className="mb-2 block text-[11px] font-black uppercase tracking-widest text-zinc-400">👥 Хүний тоо</label>
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                      {[1, 2, 3, 4, 5, 6, 8].map(size => (
+                        <button
+                          key={size}
+                          onClick={() => setPartySize(size)}
+                          className={cn(
+                            "flex h-10 min-w-[40px] items-center justify-center rounded-xl text-[14px] font-bold transition",
+                            partySize === size 
+                              ? "bg-orange-500 text-white" 
+                              : "bg-zinc-100 text-zinc-600 dark:bg-white/5 dark:text-zinc-400"
+                          )}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Time Slots */}
+                  <div>
+                    <label className="mb-2 block text-[11px] font-black uppercase tracking-widest text-zinc-400">🕐 Цаг сонгох</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {TIME_SLOTS.map(slot => (
+                        <button
+                          key={slot}
+                          onClick={() => setBookingTime(slot)}
+                          className={cn(
+                            "rounded-xl py-2.5 text-[12px] font-bold transition",
+                            bookingTime === slot 
+                              ? "bg-zinc-900 text-white dark:bg-white dark:text-black" 
+                              : "border border-zinc-200 bg-white hover:border-zinc-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                          )}
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <button
+                    onClick={() => { setBookingSheetOpen(false); handleBooking(); }}
+                    className="group relative w-full overflow-hidden rounded-full bg-orange-500 py-4 text-[16px] font-black text-white shadow-xl shadow-orange-500/30 transition hover:bg-orange-600 active:scale-95"
+                  >
+                    Захиалга баталгаажуулах
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

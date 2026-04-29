@@ -42,7 +42,7 @@ export function ProfilePage() {
   const recentPlaces = recentIds.map(id => getPlaceById(id)).filter(Boolean)
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 md:py-12">
+    <div className="mx-auto max-w-2xl px-4 py-6 md:py-10">
       {/* Profile Header */}
       <section className="mb-10 flex items-center gap-5">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-orange-100 text-[28px] font-black text-orange-600 dark:bg-orange-500/20">

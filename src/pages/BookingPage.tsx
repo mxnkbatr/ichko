@@ -1,22 +1,19 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { 
   ArrowLeft, Calendar, Check, Clock, Users, 
   ChevronRight, Phone, User, MessageSquare, ShieldCheck,
-  CheckCircle2, Home, List
+  Home, List
 } from 'lucide-react'
 import { getPlaceById } from '../data/places'
 import { createBooking, hasConflict } from '../lib/bookings'
 import { generateSlots, todayIso } from '../lib/time'
 import { cn } from '../lib/cn'
-import { useI18n } from '../lib/i18n'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const DEFAULT_OPEN = '11:00'
 
 export function BookingPage() {
-  const { t } = useI18n()
-  const nav = useNavigate()
   const { placeId } = useParams()
   const [sp] = useSearchParams()
   const place = placeId ? getPlaceById(placeId) : undefined
@@ -29,6 +26,7 @@ export function BookingPage() {
   const [note, setNote] = useState('')
   
   const [submitted, setSubmitted] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const slots = useMemo(() => {
@@ -51,6 +49,11 @@ export function BookingPage() {
       setError('Уучлаарай, энэ цагт захиалга дүүрсэн байна.')
       return
     }
+    // Instead of immediate success, show payment
+    setShowPayment(true)
+  }
+
+  const handlePaymentComplete = () => {
     createBooking({
       placeId: place.id,
       placeName: place.name,
@@ -61,6 +64,7 @@ export function BookingPage() {
       phone,
       note: note.trim() ? note : undefined,
     })
+    setShowPayment(false)
     setSubmitted(true)
   }
 
@@ -317,6 +321,76 @@ export function BookingPage() {
           </div>
         </aside>
       </div>
+      <AnimatePresence>
+        {showPayment && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPayment(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-zinc-900"
+            >
+              <div className="bg-[#f3f4f6] px-8 py-6 text-center dark:bg-white/5">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00adef]">
+                    <span className="text-[18px] font-black text-white italic">q</span>
+                  </div>
+                  <span className="text-[22px] font-black tracking-tighter text-[#00adef]">Pay</span>
+                </div>
+                <p className="mt-2 text-[14px] font-bold text-zinc-500">Захиалга баталгаажуулах төлбөр</p>
+              </div>
+
+              <div className="p-8 text-center">
+                <div className="mx-auto mb-6 flex h-48 w-48 items-center justify-center rounded-3xl border-4 border-zinc-50 bg-white p-4 shadow-inner">
+                  {/* Fake QR Code - More detailed */}
+                  <div className="grid h-full w-full grid-cols-10 grid-rows-10 gap-[2px]">
+                    {Array.from({ length: 100 }).map((_, i) => {
+                      const row = Math.floor(i / 10);
+                      const col = i % 10;
+                      // Positioning squares (corners)
+                      const isCorner = (row < 3 && col < 3) || (row < 3 && col > 6) || (row > 6 && col < 3);
+                      const isPattern = Math.random() > 0.6;
+                      
+                      return (
+                        <div key={i} className={cn(
+                          "rounded-[1px]",
+                          (isCorner || isPattern) ? "bg-zinc-900" : "bg-zinc-50"
+                        )} />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <div className="text-[32px] font-black text-zinc-900 dark:text-white">5,000 ₮</div>
+                  <div className="text-[13px] font-medium text-zinc-500">Төлбөр төлөгдсөний дараа захиалга баталгаажна</div>
+                </div>
+
+                <button
+                  onClick={handlePaymentComplete}
+                  className="w-full rounded-full bg-[#00adef] py-4 text-[15px] font-black text-white shadow-xl shadow-[#00adef]/20 transition active:scale-95"
+                >
+                  Төлбөр төлөгдсөн
+                </button>
+                
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className="mt-4 text-[13px] font-bold text-zinc-400 hover:text-zinc-600"
+                >
+                  Болих
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
