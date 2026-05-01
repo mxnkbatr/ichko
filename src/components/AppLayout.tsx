@@ -8,7 +8,7 @@ import { cn } from '../lib/cn'
 import { applyTheme, getStoredTheme, type ThemeMode } from '../lib/theme'
 import { useEffect, useState } from 'react'
 import { useI18n } from '../lib/i18n'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
 import { SearchModal } from './SearchModal'
 
 const NAV_ITEMS = [
@@ -30,6 +30,17 @@ export function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const { scrollY } = useScroll()
+  const [showHeaderSearch, setShowHeaderSearch] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 120) {
+      setShowHeaderSearch(true)
+    } else {
+      setShowHeaderSearch(false)
+    }
+  })
+
 
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Захиалга баталгаажлаа', body: 'Cloud Nine Coffee-д хийсэн захиалга амжилттай.', time: '5 минутын өмнө', isRead: false },
@@ -189,12 +200,19 @@ export function AppLayout() {
                 {lang === 'mn' ? 'MN' : 'EN'}
               </button>
 
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8 md:hidden"
-              >
-                <Search className="h-[18px] w-[18px] stroke-[2.5px]" />
-              </button>
+              <AnimatePresence>
+                {showHeaderSearch && (
+                  <motion.button
+                    initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, width: 36, scale: 1 }}
+                    exit={{ opacity: 0, width: 0, scale: 0.8 }}
+                    onClick={() => setSearchOpen(true)}
+                    className="flex h-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8 md:hidden"
+                  >
+                    <Search className="h-[18px] w-[18px] shrink-0 stroke-[2.5px]" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
               <button
                 onClick={() => setNotifOpen(true)}
                 className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-orange-500 active:scale-110 dark:text-zinc-400 dark:hover:bg-white/8"
