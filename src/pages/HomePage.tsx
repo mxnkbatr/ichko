@@ -154,10 +154,10 @@ export function HomePage() {
                 key={c.id}
                 onClick={() => setParam('cat', c.id === 'all' ? '' : c.id)}
                 className={cn(
-                  "snap-start flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition",
+                  "snap-start flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition",
                   cat === c.id
-                    ? "bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-black"
-                    : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-white/5"
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                    : "bg-zinc-100 text-zinc-600 dark:bg-white/5 dark:text-zinc-300"
                 )}
               >
                 <span>{c.emoji}</span>
@@ -261,10 +261,10 @@ export function HomePage() {
           <div className="px-4 py-6 md:px-8">
             <div className="mb-8 flex items-center gap-3">
               <div className="relative flex flex-1 items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50 px-4 h-12 shadow-sm focus-within:border-orange-500/50 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-white/10 dark:bg-white/5">
-                <Search className="h-5 w-5 text-zinc-400" strokeWidth={2} />
+                <Search className="h-4.5 w-4.5 text-zinc-400" />
                 <input 
                   type="text"
-                  placeholder="Ресторан, хоолны газар хайх..."
+                  placeholder="Ресторан, хоол хайх..."
                   value={q}
                   onChange={(e) => setParam('q', e.target.value)}
                   className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
@@ -279,34 +279,13 @@ export function HomePage() {
             </div>
 
             <header className="mb-6 flex items-baseline justify-between">
-              <div>
-                <h1 className="text-[32px] font-extrabold tracking-tight text-zinc-950 dark:text-white leading-tight">
-                  Шилдэг {categoryLabel}
-                </h1>
-                <p className="mt-1 text-[14px] font-medium text-zinc-500">
-                  {filtered.length} газар олдлоо
-                </p>
-              </div>
+              <h1 className="text-[26px] font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
+                Шилдэг {categoryLabel}
+              </h1>
+              <span className="text-[13px] font-medium text-zinc-400">
+                {filtered.length} олдлоо
+              </span>
             </header>
-
-            {/* RECOMMENDED SECTION (Horizontal Carousel) */}
-            {filtered.length > 0 && !q && (
-              <section className="mb-10">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-[18px] font-bold tracking-tight text-zinc-900 dark:text-white">Танд таалагдах</h2>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {filtered.slice(0, 5).map(p => (
-                    <div key={p.id} className="snap-start w-[240px] shrink-0">
-                      <PlaceCard place={p} />
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-8 mb-4">
-                  <h2 className="text-[20px] font-bold tracking-tight text-zinc-900 dark:text-white">Бүх {categoryLabel}</h2>
-                </div>
-              </section>
-            )}
 
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -321,7 +300,7 @@ export function HomePage() {
                 variants={{ show: { transition: { staggerChildren: 0.04 } } }}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3"
+                className="flex flex-col divide-y divide-zinc-100 dark:divide-white/5"
               >
                 {filtered.map((p, i) => (
                   <motion.div

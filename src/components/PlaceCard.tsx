@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, Star } from 'lucide-react'
+import { MapPin, Heart, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Place } from '../data/places'
 import { cn } from '../lib/cn'
@@ -35,85 +35,91 @@ export function PlaceCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.03 }}
-      className="h-full"
     >
       <Link
         to={`/place/${place.id}`}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl",
-          selected && "ring-2 ring-inset ring-orange-500 bg-orange-50/10 dark:bg-orange-500/5"
+          "relative flex flex-col rounded-3xl bg-white overflow-hidden border border-zinc-100 transition-colors duration-150 cursor-pointer",
+          "md:flex-row md:gap-4 md:p-4 md:border-b-0 md:border-zinc-100",
+          "dark:bg-zinc-900/40 dark:border-white/5",
+          "hover:bg-zinc-50 dark:hover:bg-white/3",
+          selected && "ring-2 ring-inset ring-orange-500 bg-orange-50/30 dark:bg-orange-500/10"
         )}
       >
-        {/* Photo Container */}
-        <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 shrink-0">
+        {/* Index number */}
+        <div className="absolute top-3 left-3 z-10 w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm md:static md:mt-1 md:flex-none">
+          {index + 1}
+        </div>
+
+        {/* Photo */}
+        <div className="relative w-full aspect-[4/3] md:w-[140px] md:h-[105px] md:aspect-auto md:flex-none md:rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800">
           <img
             src={place.photos[0]?.url}
             alt={place.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          
-          {/* Gradient Overlay for Top text */}
-          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent opacity-80" />
-
-          {/* Top Actions: Distance & Favorite */}
-          <div className="absolute top-3 inset-x-3 flex items-start justify-between z-10">
-            {/* Distance Pill */}
-            <div className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold tracking-wide text-white backdrop-blur-md">
-              {place.distanceKm.toFixed(1)} км
-            </div>
-
-            {/* Favorite Button */}
-            <motion.button
-              whileTap={{ scale: 1.4 }}
-              onClick={handleToggleFav}
-              className="flex items-center justify-center h-8 w-8 rounded-full bg-black/40 backdrop-blur-md transition-colors hover:bg-black/60"
-            >
-              <Heart className={cn("h-4 w-4", isFav ? "fill-rose-500 text-rose-500" : "text-white")} strokeWidth={isFav ? 0 : 2} />
-            </motion.button>
+          {/* Distance Badge */}
+          <div className="absolute bottom-3 right-3 rounded-full bg-black/40 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-white">
+            {place.distanceKm.toFixed(1)} км
           </div>
         </div>
 
-        {/* Content Details */}
-        <div className="flex flex-col flex-1 pt-3 pb-4">
+        <div className="flex-1 min-w-0 p-4 pt-4 md:p-0">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold text-[17px] text-zinc-950 dark:text-white leading-tight truncate">
+            <h3 className="font-extrabold text-[18px] text-zinc-900 dark:text-white leading-tight truncate">
               {place.name}
             </h3>
-            
-            {/* Rating Pill */}
-            <div className="flex shrink-0 items-center gap-1 rounded-full bg-zinc-100 px-1.5 py-0.5 text-[12px] font-bold text-zinc-900 dark:bg-zinc-800 dark:text-white">
-              <span className="text-zinc-900 dark:text-white">{place.rating.toFixed(1)}</span>
-              <Star className="h-3 w-3 fill-orange-500 text-orange-500" />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 text-orange-500 font-bold text-[14px]">
+                <Star className="h-3.5 w-3.5 fill-current" />
+                {place.rating.toFixed(1)}
+              </div>
+              <motion.button
+                whileTap={{ scale: 1.4 }}
+                onClick={handleToggleFav}
+                className={cn(
+                  "flex-none transition-colors p-1.5 rounded-full bg-zinc-50 dark:bg-white/5",
+                  isFav ? "text-rose-500" : "text-zinc-300 hover:text-rose-400"
+                )}
+              >
+                <Heart className={cn("h-4.5 w-4.5", isFav && "fill-current")} />
+              </motion.button>
             </div>
           </div>
 
-          <div className="mt-1 flex items-center text-[13px] text-zinc-500 gap-1.5">
-            <span className="font-medium text-zinc-600 dark:text-zinc-400">{CAT_LABEL[place.category]}</span>
-            <span className="text-zinc-300 dark:text-zinc-600">•</span>
-            <span className="font-medium text-zinc-600 dark:text-zinc-400">{'$'.repeat(place.priceLevel)}</span>
-            <span className="text-zinc-300 dark:text-zinc-600">•</span>
+          <div className="mt-1 flex items-center gap-2 text-[13px] font-medium text-zinc-500">
+            <span>{place.reviewCount.toLocaleString()} үнэлгээ</span>
+            <span className="text-zinc-300">·</span>
+            <span className="text-zinc-600 dark:text-zinc-300 font-bold">{CAT_LABEL[place.category]}</span>
+            <span className="text-zinc-300">·</span>
+            <span className="font-bold text-zinc-950 dark:text-zinc-100">{'$'.repeat(place.priceLevel)}</span>
+          </div>
+
+          <div className="mt-1.5 text-[12px] text-zinc-500 flex items-center gap-1.5">
+            <MapPin className="h-3 w-3 shrink-0 text-zinc-400" />
             <span className="truncate">{place.address}</span>
           </div>
 
-          <div className="mt-2.5 flex items-center gap-2">
+          <div className="mt-1.5 flex items-center gap-1.5 text-[12px]">
             <span className={cn(
-              "rounded bg-zinc-100 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
-              place.openNow ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400" : "text-zinc-500 dark:bg-white/10 dark:text-zinc-400"
+              "font-semibold flex items-center gap-1",
+              place.openNow ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
             )}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", place.openNow ? "bg-emerald-500" : "bg-rose-500")} />
               {place.openNow ? 'Нээлттэй' : 'Хаалттай'}
             </span>
-            
-            {/* Highlights (max 2, tag style) */}
-            <div className="flex items-center gap-1.5 overflow-hidden">
-              {place.highlights.slice(0, 2).map(h => (
-                <span
-                  key={h}
-                  className="shrink-0 rounded border border-zinc-200 bg-transparent px-1.5 py-0.5 text-[10px] font-semibold text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"
-                >
-                  {h}
-                </span>
-              ))}
-            </div>
+            {place.openNow && <span className="text-zinc-400">· {place.closesAt} хүртэл</span>}
+          </div>
+
+          <div className="mt-3.5 flex flex-wrap gap-1.5">
+            {place.highlights.slice(0, 2).map(h => (
+              <span
+                key={h}
+                className="rounded-lg border border-zinc-200 bg-transparent px-2 py-1 text-[11px] font-medium text-zinc-500 dark:border-white/10 dark:text-zinc-400"
+              >
+                {h}
+              </span>
+            ))}
           </div>
         </div>
       </Link>
