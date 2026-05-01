@@ -259,7 +259,7 @@ export function HomePage() {
         {/* Results Panel */}
         <main className="flex-1">
           <div className="px-4 py-6 md:px-8">
-            <div className="mb-8 flex items-center gap-3">
+            <div className="mb-8 flex items-center gap-3 md:hidden">
               <div className="relative flex flex-1 items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50 px-4 h-12 shadow-sm focus-within:border-orange-500/50 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-white/10 dark:bg-white/5">
                 <Search className="h-4.5 w-4.5 text-zinc-400" />
                 <input 
