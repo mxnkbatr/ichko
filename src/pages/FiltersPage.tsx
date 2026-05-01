@@ -77,8 +77,9 @@ export function FiltersPage() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 100 }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950"
+      className="fixed inset-0 z-50 flex flex-col items-center bg-white dark:bg-zinc-950"
     >
+      <div className="w-full max-w-2xl flex-1 flex flex-col relative h-full border-x border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950">
       {/* ── HEADER ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-100 bg-white/90 px-4 backdrop-blur-xl dark:border-white/5 dark:bg-zinc-900/90">
         <div className="flex w-20 items-center">
@@ -242,7 +243,7 @@ export function FiltersPage() {
       </div>
 
       {/* ── STICKY FOOTER ACTION ──────────────────────────────── */}
-      <footer className="fixed bottom-0 left-0 right-0 border-t border-zinc-100 bg-white/90 p-6 backdrop-blur-2xl safe-area-bottom dark:border-white/5 dark:bg-zinc-950/90 shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.06)]">
+      <footer className="absolute bottom-0 left-0 right-0 border-t border-zinc-100 bg-white/90 p-6 backdrop-blur-2xl safe-area-bottom dark:border-white/5 dark:bg-zinc-950/90 shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.06)]">
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={() => nav(-1)}
@@ -262,6 +263,7 @@ export function FiltersPage() {
           </AnimatePresence>
         </motion.button>
       </footer>
+      </div>
     </motion.div>
   )
 }
