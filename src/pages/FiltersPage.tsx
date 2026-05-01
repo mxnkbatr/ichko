@@ -3,7 +3,7 @@ import {
   ArrowLeft, Check, Map, Utensils, Beer, Coffee,
   Smile, PartyPopper, Heart, Users, Laptop, Guitar, FlaskConical
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { cn } from '../lib/cn'
 import { places as allPlaces, type VibeTag } from '../data/places'
 import { applyFilters, clearAllFilters, parseFilterState, writeAdvancedToParams } from '../lib/filters'
