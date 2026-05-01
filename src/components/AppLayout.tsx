@@ -29,6 +29,60 @@ export function AppLayout() {
   const { lang, setLang, t } = useI18n()
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'Захиалга баталгаажлаа', body: 'Cloud Nine Coffee-д хийсэн захиалга амжилттай.', time: '5 минутын өмнө', isRead: false },
+    { id: 2, title: 'Шинэ газар нэмэгдлээ', body: 'Таны сонирхдог "Кафе" ангилалд шинэ газар бүртгэгдлээ.', time: '2 цагийн өмнө', isRead: true },
+    { id: 3, title: 'Урамшуулал', body: 'Амралтын өдрүүдэд Sakura Zen-д 10% хөнгөлөлттэй.', time: '1 өдрийн өмнө', isRead: true }
+  ])
+
+  const hasUnread = notifications.some(n => !n.isRead)
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+  }
+
+  // Effect to mark as read when drawer opens
+  useEffect(() => {
+    if (notifOpen) {
+      // Small delay to let the animation start
+      const timer = setTimeout(markAllAsRead, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [notifOpen])
+
+  // Simulated Real-time Notification logic (Supabase style)
+  useEffect(() => {
+    // This is where you would put your Supabase subscription logic:
+    /*
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
+        (payload) => {
+          setNotifications(prev => [payload.new, ...prev])
+        }
+      )
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+    */
+
+    // FOR DEMO: Add a notification after 10 seconds
+    const demoTimer = setTimeout(() => {
+      const newNotif = {
+        id: Date.now(),
+        title: 'Шинэ мэдэгдэл!',
+        body: 'Таны сонирхсон газар шинэ цэс гаргалаа.',
+        time: 'Дөнгөж сая',
+        isRead: false
+      }
+      setNotifications(prev => [newNotif, ...prev])
+    }, 10000)
+
+    return () => clearTimeout(demoTimer)
+  }, [])
 
   // Geolocation state simulation (usually this would be in a context)
   const [hasLocation, setHasLocation] = useState(false)
@@ -142,10 +196,17 @@ export function AppLayout() {
                 <Search className="h-[18px] w-[18px] stroke-[2.5px]" />
               </button>
               <button
-                className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/8"
+                onClick={() => setNotifOpen(true)}
+                className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-orange-500 active:scale-110 dark:text-zinc-400 dark:hover:bg-white/8"
               >
-                <Bell className="h-5 w-5" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#f8f7f5] dark:ring-[#0f0f12]" />
+                <Bell className={cn("h-5 w-5 transition-transform", notifOpen && "scale-110 text-orange-500")} />
+                {hasUnread && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-[#f8f7f5] dark:ring-[#0f0f12]"
+                  />
+                )}
               </button>
 
               <button
@@ -375,6 +436,117 @@ export function AppLayout() {
                     ICHKO v1.0.2 • 2024
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── NOTIFICATION DRAWER ────────────────────────────────── */}
+      <AnimatePresence>
+        {notifOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setNotifOpen(false)}
+              className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-md dark:bg-black/40"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 right-0 top-0 z-[70] w-full max-w-[360px] bg-white/80 shadow-2xl backdrop-blur-2xl dark:bg-zinc-900/80"
+            >
+              <div className="flex h-full flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 pb-4">
+                  <div>
+                    <h2 className="text-[20px] font-black tracking-tight">Мэдэгдэл</h2>
+                    {hasUnread && <p className="text-[12px] font-bold text-orange-500">Шинэ мэдэгдэл байна</p>}
+                  </div>
+                  <button
+                    onClick={() => setNotifOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 transition active:scale-90 dark:bg-white/5"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* List */}
+                <div className="flex-1 overflow-y-auto px-6 py-2">
+                  {notifications.length === 0 ? (
+                    <div className="flex h-full flex-col items-center justify-center text-center">
+                      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-orange-500/5 dark:bg-orange-500/10">
+                        <Bell className="h-10 w-10 text-orange-500/40" />
+                      </div>
+                      <h3 className="text-[16px] font-black">Танд одоогоор мэдэгдэл алга</h3>
+                      <p className="mt-1 text-[13px] font-medium text-zinc-400">Шинэ мэдээлэл ирэх үед энд харагдана.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {notifications.map((n) => (
+                        <motion.div
+                          key={n.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={cn(
+                            "group relative overflow-hidden rounded-2xl p-4 transition-all active:scale-[0.98]",
+                            !n.isRead
+                              ? "bg-orange-500/10 ring-1 ring-orange-500/20 dark:bg-orange-500/10 dark:ring-orange-500/30"
+                              : "bg-white/50 ring-1 ring-zinc-100 hover:bg-white dark:bg-white/5 dark:ring-white/5 dark:hover:bg-white/10"
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <h4 className={cn(
+                                "text-[14px] font-black leading-tight",
+                                !n.isRead ? "text-orange-950 dark:text-orange-100" : "text-zinc-800 dark:text-zinc-200"
+                              )}>
+                                {n.title}
+                              </h4>
+                              <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                {n.body}
+                              </p>
+                              <div className="mt-3 flex items-center gap-2">
+                                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                                  {n.time}
+                                </span>
+                                {!n.isRead && (
+                                  <>
+                                    <span className="h-1 w-1 rounded-full bg-orange-500/30" />
+                                    <span className="text-[11px] font-black text-orange-500 uppercase tracking-widest">New</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {!n.isRead && (
+                              <div className="h-2 w-2 shrink-0 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Action */}
+                {notifications.length > 0 && (
+                  <div className="p-6">
+                    <button
+                      onClick={markAllAsRead}
+                      className="w-full rounded-2xl bg-zinc-900 py-4 text-[14px] font-bold text-white transition hover:bg-black active:scale-95 dark:bg-white dark:text-zinc-900"
+                    >
+                      Бүгдийг уншсан болгох
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

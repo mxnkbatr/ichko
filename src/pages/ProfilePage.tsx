@@ -4,11 +4,11 @@ import {
   Trash2, LogOut, History,
   Bookmark, CalendarCheck, Star
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { listBookings } from '../lib/bookings'
 import { getFavorites } from '../lib/favorites'
 import { getPlaceById } from '../data/places'
-import { PlaceCard } from '../components/PlaceCard'
 import { applyTheme, getStoredTheme, type ThemeMode } from '../lib/theme'
 import { useI18n } from '../lib/i18n'
 import { cn } from '../lib/cn'
@@ -50,7 +50,7 @@ export function ProfilePage() {
         <div className="min-w-0 flex-1">
           <h1 className="text-[24px] font-black tracking-tight text-zinc-950 dark:text-white">Зочин хэрэглэгч</h1>
           <p className="text-[14px] text-zinc-500">Гишүүн болсон: 2025 оноос</p>
-          <button className="mt-2 text-[13px] font-bold text-orange-500 hover:underline">
+          <button className="mt-3 inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-2.5 text-[14px] font-black text-white shadow-lg shadow-orange-500/25 active:scale-95 transition-all">
             Нэвтрэх / Бүртгүүлэх
           </button>
         </div>
@@ -80,8 +80,8 @@ export function ProfilePage() {
           {/* Theme Toggle */}
           <div className="flex items-center justify-between p-5 border-b border-zinc-50 dark:border-white/5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 dark:bg-white/5">
-                {theme === 'dark' ? <Moon className="h-5 w-5 text-blue-400" /> : <Sun className="h-5 w-5 text-amber-500" />}
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/10">
+                {theme === 'dark' ? <Moon className="h-6 w-6 text-blue-500 fill-blue-500/20" /> : <Sun className="h-6 w-6 text-amber-500 fill-amber-500/20" />}
               </div>
               <span className="text-[15px] font-bold text-zinc-700 dark:text-zinc-200">Харанхуй горим</span>
             </div>
@@ -104,8 +104,8 @@ export function ProfilePage() {
           {/* Language Selector */}
           <div className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 dark:bg-white/5">
-                <Languages className="h-5 w-5 text-zinc-500" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/10">
+                <Languages className="h-6 w-6 text-emerald-500" />
               </div>
               <span className="text-[15px] font-bold text-zinc-700 dark:text-zinc-200">Хэл: {lang === 'mn' ? 'Монгол' : 'English'}</span>
             </div>
@@ -141,9 +141,45 @@ export function ProfilePage() {
               Цэвэрлэх
             </button>
           </div>
-          <div className="grid gap-2">
-            {recentPlaces.map((p, i) => (
-              p && <PlaceCard key={p.id} place={p} index={i} />
+          <div className="grid gap-4">
+            {recentPlaces.map((p, _i) => (
+              p && (
+                <Link
+                  key={p.id}
+                  to={`/place/${p.id}`}
+                  className="group relative overflow-hidden rounded-[2rem] bg-white shadow-sm transition-all hover:shadow-md dark:bg-zinc-900"
+                >
+                  <div className="relative aspect-[16/9] w-full overflow-hidden">
+                    <img
+                      src={p.photos[0]?.url}
+                      alt={p.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                    
+                    {/* Info Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-[20px] font-black text-white leading-tight">
+                        {p.name}
+                      </h3>
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-[13px] font-bold text-white/80">
+                        <div className="flex items-center gap-1 text-orange-400">
+                          <Star className="h-4 w-4 fill-current" />
+                          {p.rating.toFixed(1)}
+                        </div>
+                        <span className="text-white/30">•</span>
+                        <span className="truncate">{p.address}</span>
+                      </div>
+                    </div>
+
+                    {/* Distance Badge */}
+                    <div className="absolute top-4 right-4 rounded-full bg-black/40 px-3 py-1 text-[11px] font-black text-white backdrop-blur-md">
+                      {p.distanceKm.toFixed(1)}км
+                    </div>
+                  </div>
+                </Link>
+              )
             ))}
           </div>
         </section>
