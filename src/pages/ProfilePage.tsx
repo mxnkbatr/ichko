@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   Moon, Sun, Languages,
   Trash2, LogOut, History,
-  Bookmark, CalendarCheck, Star, User, ChevronRight
+  Star, User, ChevronRight
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
