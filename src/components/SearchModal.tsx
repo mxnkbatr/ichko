@@ -109,15 +109,23 @@ export function SearchModal({
             className="fixed inset-0 z-50 mx-auto h-full max-w-5xl overflow-y-auto px-4 py-6"
           >
             <div className="rounded-[2.2rem] border border-zinc-200/60 bg-white/80 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/90">
-              <div className="flex items-center gap-2 rounded-2xl border border-zinc-200/70 bg-white/80 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                <Search className="h-4 w-4 text-zinc-500" />
-                <input
-                  autoFocus
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search places, vibes, food..."
-                  className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
-                />
+              <div className="flex items-center gap-2">
+                <div className="flex flex-1 items-center gap-2 rounded-2xl border border-zinc-200/70 bg-white/80 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                  <Search className="h-4 w-4 text-zinc-500" />
+                  <input
+                    autoFocus
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Хайх..."
+                    className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
+                  />
+                </div>
+                <button 
+                  onClick={onClose}
+                  className="px-2 text-[14px] font-bold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+                >
+                  Болих
+                </button>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
