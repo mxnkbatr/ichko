@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../lib/cn'
-import { places as allPlaces, type UbDistrict, type VibeTag } from '../data/places'
+import { places as allPlaces, type VibeTag } from '../data/places'
 import { applyFilters, clearAllFilters, parseFilterState, writeAdvancedToParams } from '../lib/filters'
 
 const CATS = [
@@ -25,11 +25,6 @@ const VIBES: { id: VibeTag; icon: any; label: string }[] = [
   { id: 'craft', icon: FlaskConical, label: 'Craft' },
 ]
 
-const DISTRICTS: { id: UbDistrict; label: string }[] = [
-  { id: 'СБД', label: 'СБД' },
-  { id: 'БГД', label: 'БГД' },
-  { id: 'СХД', label: 'СХД' },
-]
 
 // ── Components ─────────────────────────────────────────────────────────────
 
@@ -74,12 +69,6 @@ export function FiltersPage() {
     setParams(n, { replace: true })
   }
 
-  const setDistrict = (d: UbDistrict) => {
-    const n = new URLSearchParams(params)
-    if (n.get('dist') === d) { n.delete('dist'); n.delete('city') }
-    else { n.set('dist', d); n.set('city', 'Улаанбаатар') }
-    setParams(n, { replace: true })
-  }
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end overflow-hidden">
