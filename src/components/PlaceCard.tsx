@@ -47,7 +47,7 @@ export function PlaceCard({
         )}
       >
         {/* Index number */}
-        <div className="absolute top-3 left-3 z-10 w-6 h-6 rounded-full bg-orange-500 text-white text-[11px] font-black flex items-center justify-center shadow-sm md:static md:mt-1 md:flex-none">
+        <div className="absolute top-3 left-3 z-10 w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm md:static md:mt-1 md:flex-none">
           {index + 1}
         </div>
 
@@ -64,7 +64,7 @@ export function PlaceCard({
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 p-4 md:p-0">
+        <div className="flex-1 min-w-0 p-4 pt-5 md:p-0">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-bold text-[16px] text-zinc-950 dark:text-white leading-snug truncate">
               {place.name}
@@ -82,7 +82,7 @@ export function PlaceCard({
                   isFav ? "text-rose-500" : "text-zinc-300 hover:text-rose-400"
                 )}
               >
-                <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
+                <Heart className={cn("h-4.5 w-4.5", isFav && "fill-current")} />
               </motion.button>
             </div>
           </div>
@@ -115,7 +115,7 @@ export function PlaceCard({
             {place.highlights.slice(0, 3).map(h => (
               <span
                 key={h}
-                className="rounded-lg bg-zinc-100 px-2 py-1 text-[11px] font-bold text-zinc-500 dark:bg-white/5 dark:text-zinc-400"
+                className="rounded-lg bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-600 dark:bg-orange-500/10 dark:text-orange-400"
               >
                 {h}
               </span>

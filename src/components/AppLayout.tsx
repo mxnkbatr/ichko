@@ -204,7 +204,7 @@ export function AppLayout() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-[#f8f7f5] dark:ring-[#0f0f12]"
+                    className="absolute right-[6px] top-[6px] h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#f8f7f5] dark:ring-[#0f0f12]"
                   />
                 )}
               </button>
@@ -300,7 +300,7 @@ export function AppLayout() {
                 )}
               >
                 <div className="flex items-center justify-center p-1.5">
-                  <Icon className={cn('h-6 w-6 stroke-[1.8px] transition-all duration-300', isActive && 'scale-110')} />
+                  <Icon className={cn('h-6 w-6 stroke-[1.5px] transition-all duration-300', isActive && 'scale-110 text-orange-500')} />
                 </div>
                 <span className={cn('mt-0.5 text-[10px] font-bold leading-none tracking-tight transition-colors duration-300', isActive ? 'text-orange-500' : 'text-zinc-400')}>
                   {t(item.labelKey).split(' ')[0]}

@@ -260,29 +260,29 @@ export function HomePage() {
         <main className="flex-1">
           <div className="px-4 py-6 md:px-8">
             <div className="mb-8 flex items-center gap-3">
-              <div className="relative flex flex-1 items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-5 py-4 shadow-sm focus-within:border-orange-500/50 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-white/10 dark:bg-white/5">
-                <Search className="h-5 w-5 text-zinc-400" />
+              <div className="relative flex flex-1 items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50 px-4 h-12 shadow-sm focus-within:border-orange-500/50 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-white/10 dark:bg-white/5">
+                <Search className="h-4.5 w-4.5 text-zinc-400" />
                 <input 
                   type="text"
                   placeholder="Нэр, хаяг, vibe-аар хайх..."
                   value={q}
                   onChange={(e) => setParam('q', e.target.value)}
-                  className="w-full bg-transparent text-[15px] font-medium outline-none placeholder:text-zinc-400"
+                  className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
                 />
               </div>
               <button 
                 onClick={() => nav(`/filters?${params.toString()}`)}
-                className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:border-orange-500 hover:bg-orange-50/50 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:hover:bg-orange-500/10"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-zinc-50 shadow-sm transition hover:border-orange-500 hover:bg-orange-50/50 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:hover:bg-orange-500/10"
               >
-                <SlidersHorizontal className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+                <SlidersHorizontal className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
               </button>
             </div>
 
             <header className="mb-6">
-              <h1 className="text-[32px] font-black tracking-tight text-zinc-950 dark:text-white leading-tight">
+              <h1 className="text-[28px] font-extrabold tracking-tight text-zinc-950 dark:text-white leading-tight">
                 Шилдэг {categoryLabel}
               </h1>
-              <p className="mt-1 text-[14px] font-bold text-zinc-400">
+              <p className="mt-1 text-[13px] font-bold text-zinc-400">
                 {filtered.length} {categoryLabel} олдлоо
               </p>
             </header>
