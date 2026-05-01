@@ -5,12 +5,7 @@ import { motion } from 'framer-motion'
 import type { Place } from '../data/places'
 import { cn } from '../lib/cn'
 import { isFavorite, toggleFavorite } from '../lib/favorites'
-
-const CAT_LABEL: Record<Place['category'], string> = {
-  restaurant: 'Ресторан',
-  pub: 'Паб / Бар',
-  cafe: 'Кафе',
-}
+import { useI18n } from '../lib/i18n'
 
 export function PlaceCard({
   place,
@@ -21,6 +16,7 @@ export function PlaceCard({
   selected?: boolean
   index?: number
 }) {
+  const { t } = useI18n()
   const [isFav, setIsFav] = useState(() => isFavorite(place.id))
 
   const handleToggleFav = (e: React.MouseEvent) => {
@@ -88,9 +84,15 @@ export function PlaceCard({
           </div>
 
           <div className="mt-1 flex items-center gap-2 text-[13px] font-medium text-zinc-500">
-            <span>{place.reviewCount.toLocaleString()} үнэлгээ</span>
+            <span>{place.reviewCount.toLocaleString()} {t('place_reviews')}</span>
             <span className="text-zinc-300">·</span>
-            <span className="text-zinc-600 dark:text-zinc-300 font-bold">{CAT_LABEL[place.category]}</span>
+            <span className="text-zinc-600 dark:text-zinc-300 font-bold">
+              {place.category === 'restaurant'
+                ? t('category_restaurant_short')
+                : place.category === 'pub'
+                  ? t('category_pub')
+                  : t('category_cafe_short')}
+            </span>
             <span className="text-zinc-300">·</span>
             <span className="font-bold text-zinc-950 dark:text-zinc-100">{'$'.repeat(place.priceLevel)}</span>
           </div>
@@ -106,9 +108,9 @@ export function PlaceCard({
               place.openNow ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
             )}>
               <span className={cn("h-1.5 w-1.5 rounded-full", place.openNow ? "bg-emerald-500" : "bg-rose-500")} />
-              {place.openNow ? 'Нээлттэй' : 'Хаалттай'}
+              {place.openNow ? t('place_open') : t('place_closed')}
             </span>
-            {place.openNow && <span className="text-zinc-400">· {place.closesAt} хүртэл</span>}
+            {place.openNow && <span className="text-zinc-400">· {place.closesAt} {t('place_until')}</span>}
           </div>
 
           <div className="mt-3.5 flex flex-wrap gap-1.5">

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { places } from '../data/places'
 import { addRecentSearch, getRecentSearches } from './SearchBar'
 import { cn } from '../lib/cn'
+import { useI18n } from '../lib/i18n'
 
 type PlaceCategory = 'restaurant' | 'cafe' | 'pub'
 
@@ -15,6 +16,7 @@ export function SearchModal({
   open: boolean
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const nav = useNavigate()
   const [q, setQ] = useState('')
   const [debouncedQ, setDebouncedQ] = useState('')
@@ -116,7 +118,7 @@ export function SearchModal({
                     autoFocus
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    placeholder="Хайх..."
+                    placeholder={t('search_ph')}
                     className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
                   />
                 </div>
@@ -124,7 +126,7 @@ export function SearchModal({
                   onClick={onClose}
                   className="px-2 text-[14px] font-bold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
                 >
-                  Болих
+                  {t('search_cancel')}
                 </button>
               </div>
 
@@ -144,21 +146,21 @@ export function SearchModal({
                   onClick={() => searchCategory('restaurant')}
                   className="rounded-full bg-brand-500/10 px-3 py-1.5 text-[12px] font-semibold text-brand-700 dark:text-brand-200"
                 >
-                  🍽️ Ресторан
+                  🍽️ {t('common_restaurants')}
                 </button>
                 <button
                   type="button"
                   onClick={() => searchCategory('cafe')}
                   className="rounded-full bg-brand-500/10 px-3 py-1.5 text-[12px] font-semibold text-brand-700 dark:text-brand-200"
                 >
-                  ☕ Кафе
+                  ☕ {t('common_cafe')}
                 </button>
                 <button
                   type="button"
                   onClick={() => searchCategory('pub')}
                   className="rounded-full bg-brand-500/10 px-3 py-1.5 text-[12px] font-semibold text-brand-700 dark:text-brand-200"
                 >
-                  🍺 Паб
+                  🍺 {t('common_pub')}
                 </button>
               </div>
 
@@ -199,7 +201,7 @@ export function SearchModal({
                 ))}
                 {!results.length && debouncedQ.trim() ? (
                   <div className="rounded-2xl border border-zinc-200 bg-white/60 px-4 py-4 text-[13px] text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
-                    Илэрц олдсонгүй.
+                    {t('search_no_results')}
                   </div>
                 ) : null}
               </div>

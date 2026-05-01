@@ -10,6 +10,7 @@ import { places as allPlaces, getPlaceById } from '../data/places'
 import { generateSlots, todayIso } from '../lib/time'
 import { cn } from '../lib/cn'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useI18n } from '../lib/i18n'
 
 // ── Stars Helper ─────────────────────────────────────────────────────────────
 function StarRating({ rating }: { rating: number }) {
@@ -22,6 +23,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export function BookingsPage() {
+  const { t } = useI18n()
   const allBookings = listBookings()
   const [tab, setTab] = useState<'active' | 'completed' | 'cancelled'>('active')
 
@@ -50,7 +52,7 @@ export function BookingsPage() {
         
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-[28px] font-black tracking-tight text-zinc-950 dark:text-white md:text-[32px]">Миний захиалгууд</h1>
+          <h1 className="text-[28px] font-black tracking-tight text-zinc-950 dark:text-white md:text-[32px]">{t('bookings_my')}</h1>
           <Link
             to="/"
             className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-100 text-orange-600 transition hover:bg-orange-200 active:scale-95 dark:bg-orange-500/20 dark:text-orange-500"
@@ -61,18 +63,18 @@ export function BookingsPage() {
 
         {/* Segmented Control */}
         <div className="mb-8 flex rounded-2xl bg-zinc-200/60 p-1 dark:bg-white/5">
-          {(['active', 'completed', 'cancelled'] as const).map(t => (
+          {(['active', 'completed', 'cancelled'] as const).map(tabKey => (
             <button
-              key={t}
-              onClick={() => { setTab(t); setReschedulingId(null) }}
+              key={tabKey}
+              onClick={() => { setTab(tabKey); setReschedulingId(null) }}
               className={cn(
                 "flex-1 rounded-[14px] py-2.5 text-[13px] font-bold transition-all",
-                tab === t
+                tab === tabKey
                   ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-white"
                   : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
               )}
             >
-              {t === 'active' ? 'Идэвхтэй' : t === 'completed' ? 'Дууссан' : 'Цуцлагдсан'}
+              {tabKey === 'active' ? t('bookings_tab_active') : tabKey === 'completed' ? t('bookings_tab_completed') : t('bookings_tab_cancelled')}
             </button>
           ))}
         </div>
@@ -91,9 +93,9 @@ export function BookingsPage() {
                 </div>
               </div>
               <h2 className="text-[18px] font-black text-zinc-950 dark:text-white">
-                {tab === 'active' ? 'Идэвхтэй захиалга байхгүй байна' : tab === 'completed' ? 'Дууссан захиалга алга' : 'Цуцлагдсан захиалга алга'}
+                {tab === 'active' ? t('bookings_empty_active') : tab === 'completed' ? t('bookings_empty_completed') : t('bookings_empty_cancelled')}
               </h2>
-              <p className="mt-2 max-w-[200px] text-[14px] font-medium text-zinc-400">Шинэ газар хайж ширээ захиалаарай.</p>
+              <p className="mt-2 max-w-[200px] text-[14px] font-medium text-zinc-400">{t('bookings_empty_hint')}</p>
               
               {tab === 'active' && (
                 <Link
@@ -101,7 +103,7 @@ export function BookingsPage() {
                   className="mt-8 flex items-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-[14px] font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95"
                 >
                   <Search className="h-4 w-4" />
-                  Газар хайж захиалах
+                  {t('bookings_search_and_book')}
                 </Link>
               )}
             </div>
@@ -110,8 +112,8 @@ export function BookingsPage() {
             {tab === 'active' && (
               <section>
                 <div className="mb-6 flex items-center justify-between">
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">Танд санал болгох</h3>
-                  <Link to="/" className="text-[12px] font-bold text-orange-500">Бүгдийг харах</Link>
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('bookings_recommended')}</h3>
+                  <Link to="/" className="text-[12px] font-bold text-orange-500">{t('bookings_see_all')}</Link>
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {allPlaces.slice(0, 3).map(p => (
@@ -161,7 +163,7 @@ export function BookingsPage() {
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="text-[16px] md:text-[18px] font-bold text-zinc-900 line-through dark:text-white leading-snug line-clamp-1">{b.placeName}</h3>
                             <span className="shrink-0 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold tracking-wider text-rose-500 dark:bg-rose-500/10 dark:text-rose-400">
-                              CANCELLED
+                              {t('bookings_tab_cancelled').toUpperCase()}
                             </span>
                           </div>
                           
@@ -195,13 +197,13 @@ export function BookingsPage() {
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="text-[16px] md:text-[18px] font-bold text-zinc-900 dark:text-white leading-snug line-clamp-1">{b.placeName}</h3>
                             <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold tracking-wider text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                              CONFIRMED
+                              {t('common_confirmed').toUpperCase()}
                             </span>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-zinc-500 dark:text-zinc-400">
                             <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 stroke-[1.5px]" /> {b.date}</span>
                             <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 stroke-[1.5px]" /> {b.time}</span>
-                            <span className="flex items-center gap-1.5"><Users className="h-4 w-4 stroke-[1.5px]" /> {b.people} хүн</span>
+                            <span className="flex items-center gap-1.5"><Users className="h-4 w-4 stroke-[1.5px]" /> {b.people} {t('bookings_people_suffix')}</span>
                           </div>
                         </div>
                         <div className="mt-2.5 flex items-center gap-1.5 text-[12px] text-zinc-400">
@@ -229,7 +231,7 @@ export function BookingsPage() {
                         )}
                       >
                         <RotateCcw className="h-4 w-4 stroke-[1.5px]" />
-                        Цаг өөрчлөх
+                        {t('bookings_change_time')}
                       </button>
                       <button
                         onClick={() => cancelBooking(b.id)}
@@ -250,7 +252,7 @@ export function BookingsPage() {
                           className="border-t border-zinc-100 bg-zinc-50 dark:border-white/5 dark:bg-white/3"
                         >
                           <div className="p-5 md:p-6">
-                            <h4 className="mb-4 text-[13px] font-bold text-zinc-900 dark:text-white">Шинэ цаг сонгох</h4>
+                            <h4 className="mb-4 text-[13px] font-bold text-zinc-900 dark:text-white">{t('bookings_pick_new_time')}</h4>
                             <div className="grid gap-4 md:grid-cols-2">
                               <input
                                 type="date"

@@ -14,7 +14,7 @@ import { useI18n } from '../lib/i18n'
 import { cn } from '../lib/cn'
 
 export function ProfilePage() {
-  const { lang, setLang } = useI18n()
+  const { lang, setLang, t } = useI18n()
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme() ?? 'light')
 
   // Mocking auth state based on the prompt
@@ -37,9 +37,9 @@ export function ProfilePage() {
   }
 
   const stats = [
-    { label: 'ЗАХИАЛГА', value: bookings.length },
-    { label: 'ДУРТАЙ', value: favorites.length },
-    { label: 'ҮНЭЛГЭЭ', value: 0 },
+    { label: t('profile_stats_bookings'), value: bookings.length },
+    { label: t('profile_stats_favorites'), value: favorites.length },
+    { label: t('profile_stats_reviews'), value: 0 },
   ]
 
   const recentPlaces = recentIds.map(id => getPlaceById(id)).filter(Boolean)
@@ -59,17 +59,17 @@ export function ProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-[22px] font-bold tracking-tight text-zinc-950 dark:text-white leading-tight">
-              {isLoggedIn ? 'Бат-Эрдэнэ' : 'Зочин хэрэглэгч'}
+              {isLoggedIn ? 'Бат-Эрдэнэ' : t('profile_guest')}
             </h1>
             {isLoggedIn ? (
               <p className="text-[14px] text-zinc-500 font-medium">Түвшин {userLevel} • 2025 оноос</p>
             ) : (
-              <p className="text-[13px] text-zinc-500 mt-0.5">Нэвтрээд оноогоо цуглуулаарай</p>
+              <p className="text-[13px] text-zinc-500 mt-0.5">{t('profile_signin_hint')}</p>
             )}
           </div>
           {!isLoggedIn && (
             <button className="shrink-0 rounded-2xl bg-orange-500 px-5 h-11 text-[14px] font-semibold text-white shadow-sm shadow-orange-500/20 active:scale-95 transition-all">
-              Нэвтрэх
+              {t('profile_signin')}
             </button>
           )}
         </section>
@@ -98,7 +98,7 @@ export function ProfilePage() {
 
         {/* ── 3. SETTINGS LIST ────────────────────────────────────────── */}
         <section className="mb-8">
-          <h2 className="mb-2 ml-4 text-[13px] font-medium text-zinc-500">Тохиргоо</h2>
+          <h2 className="mb-2 ml-4 text-[13px] font-medium text-zinc-500">{t('profile_settings')}</h2>
           <div className="overflow-hidden rounded-2xl bg-white border border-zinc-100 shadow-sm dark:bg-zinc-900 dark:border-white/5">
             
             {/* Personal Info */}
@@ -106,7 +106,7 @@ export function ProfilePage() {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800">
                 <User className="h-4 w-4 text-zinc-600 dark:text-zinc-300" strokeWidth={2} />
               </div>
-              <span className="flex-1 text-[15px] font-medium text-zinc-900 dark:text-zinc-100">Хувийн мэдээлэл</span>
+              <span className="flex-1 text-[15px] font-medium text-zinc-900 dark:text-zinc-100">{t('profile_personal_info')}</span>
               <ChevronRight className="h-4.5 w-4.5 text-zinc-300 dark:text-zinc-600" strokeWidth={2} />
             </Link>
             
@@ -120,7 +120,7 @@ export function ProfilePage() {
                   : <Sun className="h-4 w-4 text-blue-600 dark:text-blue-400" strokeWidth={2} />
                 }
               </div>
-              <span className="flex-1 text-left text-[15px] font-medium text-zinc-900 dark:text-zinc-100">Харанхуй горим</span>
+              <span className="flex-1 text-left text-[15px] font-medium text-zinc-900 dark:text-zinc-100">{t('profile_theme_dark')}</span>
               <div className={cn(
                 "relative h-[26px] w-[46px] rounded-full p-0.5 transition-colors duration-200",
                 theme === 'dark' ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
@@ -141,7 +141,7 @@ export function ProfilePage() {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
                 <Languages className="h-4 w-4 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
               </div>
-              <span className="flex-1 text-[15px] font-medium text-zinc-900 dark:text-zinc-100">Хэл</span>
+              <span className="flex-1 text-[15px] font-medium text-zinc-900 dark:text-zinc-100">{t('profile_language')}</span>
               <div className="flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800">
                 {['mn', 'en'].map(l => (
                   <button
@@ -168,7 +168,7 @@ export function ProfilePage() {
           <section className="mb-8">
             <div className="mb-2 ml-4 flex items-center justify-between pr-4">
               <h2 className="text-[13px] font-medium text-zinc-500 flex items-center gap-1.5">
-                <History className="h-4 w-4" strokeWidth={2} /> Сүүлд үзсэн
+                <History className="h-4 w-4" strokeWidth={2} /> {t('profile_recent')}
               </h2>
               <button
                 onClick={() => { localStorage.removeItem('ichko.recentlyViewed'); setRecentIds([]) }}
@@ -227,7 +227,7 @@ export function ProfilePage() {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-500/20">
                 <Trash2 className="h-4 w-4 text-rose-600 dark:text-rose-400" strokeWidth={2} />
               </div>
-              <span className="flex-1 text-left text-[15px] font-medium text-rose-600 dark:text-rose-500">Өгөгдөл устгах</span>
+              <span className="flex-1 text-left text-[15px] font-medium text-rose-600 dark:text-rose-500">{t('profile_clear_data')}</span>
             </button>
 
             <div className="mx-4 h-px bg-zinc-100 dark:bg-white/5" />

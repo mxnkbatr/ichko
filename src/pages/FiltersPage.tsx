@@ -8,12 +8,13 @@ import { cn } from '../lib/cn'
 import { places as allPlaces, type VibeTag } from '../data/places'
 import { applyFilters, clearAllFilters, parseFilterState, writeAdvancedToParams } from '../lib/filters'
 import { useMemo } from 'react'
+import { useI18n } from '../lib/i18n'
 
 const CATS = [
-  { id: 'all' as const, icon: Map, label: 'Бүгд' },
-  { id: 'restaurant' as const, icon: Utensils, label: 'Ресторан' },
-  { id: 'pub' as const, icon: Beer, label: 'Паб' },
-  { id: 'cafe' as const, icon: Coffee, label: 'Кафе' },
+  { id: 'all' as const, icon: Map, labelKey: 'category_all' as const },
+  { id: 'restaurant' as const, icon: Utensils, labelKey: 'category_restaurant_short' as const },
+  { id: 'pub' as const, icon: Beer, labelKey: 'category_pub_short' as const },
+  { id: 'cafe' as const, icon: Coffee, labelKey: 'category_cafe_short' as const },
 ]
 
 const VIBES: { id: VibeTag; icon: any; label: string }[] = [
@@ -35,6 +36,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function FiltersPage() {
+  const { t } = useI18n()
   const [params, setParams] = useSearchParams()
   const nav = useNavigate()
 
@@ -92,7 +94,7 @@ export function FiltersPage() {
         </div>
         
         <h1 className="text-[17px] font-bold tracking-tight text-zinc-950 dark:text-white">
-          Шүүлтүүр
+          {t('filter_title')}
         </h1>
 
         <div className="flex w-20 justify-end">
@@ -100,7 +102,7 @@ export function FiltersPage() {
             onClick={() => setParams(clearAllFilters(params), { replace: true })}
             className="px-2 text-[14px] font-bold text-zinc-400 transition hover:text-zinc-900 active:opacity-60 dark:hover:text-zinc-200"
           >
-            Цэвэрлэх
+            {t('filters_clear')}
           </button>
         </div>
       </header>
@@ -110,7 +112,7 @@ export function FiltersPage() {
         
         {/* ANGIЛАЛ */}
         <section className="px-6 py-8 border-b border-zinc-100 dark:border-white/5">
-          <SectionHeader>АНГИЛАЛ</SectionHeader>
+          <SectionHeader>{t('filters_section_category')}</SectionHeader>
           <div className="space-y-3">
             {CATS.map(c => {
               const active = f.cat === c.id || (c.id === 'all' && !f.cat)
@@ -131,7 +133,7 @@ export function FiltersPage() {
                     active ? "font-bold text-zinc-950 dark:text-white" : "font-semibold text-zinc-500 dark:text-zinc-400"
                   )}>
                     <c.icon className={cn("h-5 w-5", active ? "text-orange-500" : "text-zinc-400")} />
-                    {c.label}
+                    {t(c.labelKey)}
                   </span>
                   {active && (
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500">
@@ -146,7 +148,7 @@ export function FiltersPage() {
 
         {/* ҮНИЙН ТӨВШИН - Segmented Control */}
         <section className="px-6 py-8 border-b border-zinc-100 dark:border-white/5">
-          <SectionHeader>ҮНИЙН ТӨВШИН</SectionHeader>
+          <SectionHeader>{t('filters_section_price')}</SectionHeader>
           <div className="flex h-12 rounded-2xl bg-zinc-100 p-1 dark:bg-white/5">
             {[1, 2, 3].map(lvl => {
               const key = `p${lvl}` as 'price1' | 'price2' | 'price3'
@@ -171,7 +173,7 @@ export function FiltersPage() {
 
         {/* VIBE / MOOD - Chips */}
         <section className="px-6 py-8 border-b border-zinc-100 dark:border-white/5">
-          <SectionHeader>VIBE / MOOD</SectionHeader>
+          <SectionHeader>{t('filters_section_vibe')}</SectionHeader>
           <div className="flex flex-wrap gap-2.5">
             {VIBES.map(v => {
               const active = f.vibes?.includes(v.id)
@@ -198,8 +200,8 @@ export function FiltersPage() {
         {/* ОДОО НЭЭЛТТЭЙ */}
         <section className="px-6 py-8 border-b border-zinc-100 flex items-center justify-between dark:border-white/5">
           <div>
-            <h3 className="text-[15px] font-bold text-zinc-950 dark:text-white">Одоо нээлттэй</h3>
-            <p className="text-[12px] text-zinc-400 mt-0.5 font-medium">Зөвхөн одоо ажиллаж байгаа газрууд</p>
+            <h3 className="text-[15px] font-bold text-zinc-950 dark:text-white">{t('home_open_now')}</h3>
+            <p className="text-[12px] text-zinc-400 mt-0.5 font-medium">{t('filters_open_now_hint')}</p>
           </div>
           <button
             onClick={() => setAdv({ openNow: !adv.openNow })}
@@ -219,7 +221,7 @@ export function FiltersPage() {
 
         {/* МИН. ҮНЭЛГЭЭ */}
         <section className="px-6 py-8">
-          <SectionHeader>МИН. ҮНЭЛГЭЭ</SectionHeader>
+          <SectionHeader>{t('filters_section_min_rating')}</SectionHeader>
           <div className="flex items-center justify-between rounded-[2rem] bg-zinc-50 p-6 dark:bg-white/2">
             <div className="flex gap-2 text-[26px]">
               {[1, 2, 3, 4, 5].map(star => (
@@ -258,7 +260,7 @@ export function FiltersPage() {
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2"
             >
-              {resultsCount} газар харах
+              {resultsCount} {t('filters_view_results')}
             </motion.span>
           </AnimatePresence>
         </motion.button>

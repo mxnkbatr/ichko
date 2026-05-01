@@ -6,8 +6,10 @@ import { getPlaceById } from '../data/places'
 import { PlaceCard } from '../components/PlaceCard'
 import { cn } from '../lib/cn'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useI18n } from '../lib/i18n'
 
 export function FavoritesPage() {
+  const { t } = useI18n()
   const [favIds, setFavIds] = useState<string[]>([])
 
   useEffect(() => {
@@ -21,30 +23,35 @@ export function FavoritesPage() {
       {/* Header */}
       <div className="mb-10 flex items-center justify-between">
         <div>
-          <h1 className="text-[32px] font-black tracking-tight text-zinc-950 dark:text-white md:text-[40px]">Дуртай газрууд</h1>
+          <h1 className="text-[32px] font-black tracking-tight text-zinc-950 dark:text-white md:text-[40px]">{t('favorites_title_full')}</h1>
           <p className="mt-1 text-[14px] font-medium text-zinc-400 md:text-[15px]">
-            Таны хадгалсан шилдэг газрууд
+            {t('favorites_subtitle_full')}
           </p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-rose-500/5 px-3 py-1.5 text-[12px] font-bold text-rose-500 dark:bg-rose-500/10">
           <Heart className="h-3.5 w-3.5 fill-current" />
-          <span className="font-black">{favPlaces.length}</span> хадгалсан
+          <span className="font-black">{favPlaces.length}</span> {t('favorites_saved_count')}
         </div>
       </div>
 
       {/* Filter Chips */}
       <div className="mb-8 flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {['Бүгд', 'Ресторан', 'Кафе', 'Паб'].map(c => (
+        {[
+          { id: 'all', label: t('category_all') },
+          { id: 'restaurant', label: t('category_restaurant_short') },
+          { id: 'cafe', label: t('category_cafe_short') },
+          { id: 'pub', label: t('category_pub_short') },
+        ].map(c => (
           <button
-            key={c}
+            key={c.id}
             className={cn(
               "whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-bold transition",
-              c === 'Бүгд' 
+              c.id === 'all' 
                 ? "bg-zinc-950 text-white dark:bg-white dark:text-black" 
                 : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-white/5 dark:text-zinc-400"
             )}
           >
-            {c}
+            {c.label}
           </button>
         ))}
       </div>
@@ -61,16 +68,16 @@ export function FavoritesPage() {
               <Heart className="h-10 w-10 text-rose-500" strokeWidth={1.5} />
             </div>
           </div>
-          <h2 className="text-[18px] font-black text-zinc-950 dark:text-white">Танд одоогоор дуртай газар алга</h2>
+          <h2 className="text-[18px] font-black text-zinc-950 dark:text-white">{t('favorites_empty_title_full')}</h2>
           <p className="mt-2 max-w-xs text-[14px] font-medium text-zinc-400">
-            Шинэ газруудтай танилцаж, өөрийн цуглуулгаа үүсгээрэй.
+            {t('favorites_empty_hint_full')}
           </p>
           <Link
             to="/"
             className="mt-10 flex items-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-[14px] font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95"
           >
             <Search className="h-4 w-4" />
-            Газруудтай танилцах
+            {t('favorites_browse_places')}
           </Link>
         </motion.div>
       ) : (

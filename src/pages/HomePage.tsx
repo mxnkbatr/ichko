@@ -9,6 +9,7 @@ import { PlaceCard } from '../components/PlaceCard'
 import { OsmMap } from '../components/OsmMap'
 import { cn } from '../lib/cn'
 import { haversineKm } from '../lib/geo'
+import { useI18n } from '../lib/i18n'
 
 type SortMode = 'distance' | 'rating'
 
@@ -73,6 +74,7 @@ function CustomDropdown({
 
 // ── Main Page ────────────────────────────────────────────────────────────────
 export function HomePage() {
+  const { t } = useI18n()
   const nav = useNavigate()
   const [params, setParams] = useSearchParams()
   const [selectedId, setSelectedId] = useState<string | undefined>()
@@ -124,8 +126,8 @@ export function HomePage() {
 
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string; onClear: () => void }[] = []
-    if (openNow) chips.push({ key: 'open', label: 'Нээлттэй', onClear: () => setParam('open', '') })
-    if (minRating > 0) chips.push({ key: 'minR', label: `${minRating}+ Үнэлгээ`, onClear: () => setParam('minR', '') })
+    if (openNow) chips.push({ key: 'open', label: t('place_open'), onClear: () => setParam('open', '') })
+    if (minRating > 0) chips.push({ key: 'minR', label: `${minRating}+`, onClear: () => setParam('minR', '') })
     if (price1 && price2 && price3) { /* nothing */ }
     else {
       if (price1) chips.push({ key: 'p1', label: '$', onClear: () => setParam('p1', '0') })
@@ -133,14 +135,18 @@ export function HomePage() {
       if (price3) chips.push({ key: 'p3', label: '$$$', onClear: () => setParam('p3', '0') })
     }
     return chips
-  }, [openNow, minRating, price1, price2, price3])
+  }, [openNow, minRating, price1, price2, price3, t])
 
   const categoryLabel = useMemo(() => {
-    if (cat === 'restaurant') return 'ресторан'
-    if (cat === 'pub') return 'паб'
-    if (cat === 'cafe') return 'кафе'
-    return 'газар'
-  }, [cat])
+    if (cat === 'restaurant') return t('category_restaurant_short')
+    if (cat === 'pub') return t('category_pub_short')
+    if (cat === 'cafe') return t('category_cafe_short')
+    return t('filter_places')
+  }, [cat, t])
+
+  const handleMapSelect = (id: string) => {
+    nav(`/place/${id}`)
+  }
 
   return (
     <div className="flex flex-col">
@@ -161,7 +167,13 @@ export function HomePage() {
                 )}
               >
                 <span>{c.emoji}</span>
-                {c.label}
+                {c.id === 'all'
+                  ? t('category_all')
+                  : c.id === 'restaurant'
+                    ? t('category_restaurant_short')
+                    : c.id === 'cafe'
+                      ? t('category_cafe_short')
+                      : t('category_pub')}
               </button>
             ))}
           </div>
@@ -169,12 +181,12 @@ export function HomePage() {
           {/* Filters Bar (Hidden on Mobile) */}
           <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <CustomDropdown
-              label="↕ Эрэмбэ"
+              label={`↕ ${t('home_sort')}`}
               value={sort}
               onChange={val => setParam('sort', val)}
               options={[
-                { value: 'distance', label: 'Зайгаар' },
-                { value: 'rating', label: 'Үнэлгээгээр' }
+                { value: 'distance', label: t('home_sort_distance') },
+                { value: 'rating', label: t('home_sort_rating') }
               ]}
             />
 
@@ -188,7 +200,7 @@ export function HomePage() {
               )}
             >
               <div className={cn("h-2 w-2 rounded-full", openNow ? "bg-orange-500 animate-pulse" : "bg-emerald-500")} />
-              Одоо нээлттэй
+              {t('home_open_now')}
             </button>
 
             <div className="flex shrink-0 rounded-full border border-zinc-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/5">
@@ -215,7 +227,7 @@ export function HomePage() {
               className="flex shrink-0 items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-600 hover:border-zinc-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
-              Шүүлтүүр
+              {t('home_filter')}
             </button>
           </div>
 
@@ -252,7 +264,7 @@ export function HomePage() {
             places={filtered}
             selectedId={selectedId}
             userLocation={userLoc ?? undefined}
-            onSelect={id => setSelectedId(id)}
+            onSelect={handleMapSelect}
           />
         </aside>
 
@@ -264,7 +276,7 @@ export function HomePage() {
                 <Search className="h-4.5 w-4.5 text-zinc-400" />
                 <input 
                   type="text"
-                  placeholder="Ресторан, хоол хайх..."
+                  placeholder={t('home_search_mobile_ph')}
                   value={q}
                   onChange={(e) => setParam('q', e.target.value)}
                   className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
@@ -280,10 +292,10 @@ export function HomePage() {
 
             <header className="mb-6 flex items-baseline justify-between">
               <h1 className="text-[26px] font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
-                Шилдэг {categoryLabel}
+                {t('home_best')} {categoryLabel}
               </h1>
               <span className="text-[13px] font-medium text-zinc-400">
-                {filtered.length} олдлоо
+                {filtered.length} {t('home_found_count')}
               </span>
             </header>
 
@@ -292,8 +304,8 @@ export function HomePage() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-50 text-zinc-400 dark:bg-white/5">
                   <MapPin className="h-8 w-8" />
                 </div>
-                <h3 className="mt-4 text-[18px] font-bold text-zinc-900 dark:text-white">Илэрц олдсонгүй</h3>
-                <p className="mt-1 text-[14px] text-zinc-500">Шүүлтүүрээ өөрчилж дахин оролдоорой</p>
+                <h3 className="mt-4 text-[18px] font-bold text-zinc-900 dark:text-white">{t('home_no_results_title')}</h3>
+                <p className="mt-1 text-[14px] text-zinc-500">{t('home_no_results_hint')}</p>
               </div>
             ) : (
               <motion.div
@@ -337,7 +349,7 @@ export function HomePage() {
               className="flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-[14px] font-black text-white shadow-2xl transition hover:scale-105 active:scale-95 dark:bg-white dark:text-black"
             >
               <MapIcon className="h-4 w-4" />
-              Газрын зураг
+              {t('home_map')}
             </button>
           </motion.div>
         )}
@@ -370,7 +382,7 @@ export function HomePage() {
                   places={filtered}
                   selectedId={selectedId}
                   userLocation={userLoc ?? undefined}
-                  onSelect={id => setSelectedId(id)}
+                  onSelect={handleMapSelect}
                 />
               </div>
             </motion.div>

@@ -6,7 +6,7 @@ import App from './App.tsx'
 import { initTheme } from './lib/theme'
 import { I18nProvider } from './lib/i18n'
 
-initTheme('dark')
+initTheme('light')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

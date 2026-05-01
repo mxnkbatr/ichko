@@ -163,7 +163,7 @@ export function AppLayout() {
                   <input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Хайх: нэр, хаяг, vibe…"
+                    placeholder={t('app_search_ph')}
                     className="w-full bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-400"
                   />
                 </div>
@@ -177,7 +177,7 @@ export function AppLayout() {
                     "w-full truncate text-[14px] font-medium",
                     hasLocation ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
                   )}>
-                    {hasLocation ? "Миний байршил ✓" : "Байршил оруулах..."}
+                    {hasLocation ? "Миний байршил ✓" : t('app_location_enter')}
                   </div>
                 </div>
 
@@ -276,7 +276,13 @@ export function AppLayout() {
                   )}
                 >
                   <span>{c.emoji}</span>
-                  {c.label}
+                  {c.id === 'all'
+                    ? t('category_all')
+                    : c.id === 'restaurant'
+                      ? t('category_restaurant_short')
+                      : c.id === 'cafe'
+                        ? t('category_cafe_short')
+                        : t('category_pub')}
                 </button>
               ))}
             </div>
@@ -373,10 +379,10 @@ export function AppLayout() {
                 {/* Menu Items */}
                 <div className="space-y-1">
                   {[
-                    { label: 'Бидний тухай', icon: Info, to: '/about' },
-                    { label: 'Тусламж', icon: HelpCircle, to: '/help' },
-                    { label: 'Мэдэгдэл', icon: Bell, to: '/notifications' },
-                    { label: 'Нууцлалын бодлого', icon: Shield, to: '/privacy' },
+                    { label: t('app_about'), icon: Info, to: '/about' },
+                    { label: t('app_help'), icon: HelpCircle, to: '/help' },
+                    { label: t('app_notifications'), icon: Bell, to: '/notifications' },
+                    { label: t('app_privacy'), icon: Shield, to: '/privacy' },
                   ].map((item) => (
                     <Link
                       key={item.label}
@@ -407,7 +413,7 @@ export function AppLayout() {
                         {theme === 'dark' ? <Moon className="h-5 w-5 text-orange-500" /> : <Sun className="h-5 w-5 text-orange-500" />}
                       </div>
                       <span className="text-[15px] font-medium text-zinc-700 dark:text-zinc-200">
-                        {theme === 'dark' ? 'Харанхуй горим' : 'Гэрэлт горим'}
+                        {theme === 'dark' ? t('app_theme_dark_mode') : t('app_theme_light_mode')}
                       </span>
                     </div>
                     <div className="flex h-5 w-9 items-center rounded-full bg-zinc-200 p-1 transition-colors dark:bg-orange-500">
